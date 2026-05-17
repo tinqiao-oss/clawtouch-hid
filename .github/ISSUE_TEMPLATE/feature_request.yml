@@ -1,0 +1,56 @@
+name: Feature request
+description: Propose a new firmware behavior, hardware port, or protocol opcode
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing — please read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)
+        for the scope. **Breaking changes to wire protocol v1.0 will be
+        closed without review.** New capabilities arrive as new opcodes
+        inside the same envelope, never as edits to existing opcodes.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of feature?
+      options:
+        - New opcode (additive, v1 envelope)
+        - New HID profile (multi-touch, consumer control, etc.)
+        - New hardware port (Pico 2 W, ESP32, custom carrier)
+        - Firmware refactor / performance
+        - Tooling / build / docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: What are you trying to accomplish?
+      placeholder: |
+        I want to send Android volume-up via Consumer Control HID
+        descriptor instead of having to fake it with a navigation key.
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec_sketch
+    attributes:
+      label: Spec sketch (if applicable)
+      description: |
+        For new opcodes: proposed opcode number, payload layout,
+        response shape. For HID profile changes: descriptor diff. Don't
+        write code yet — we want to agree on the contract first.
+      render: markdown
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Why can't this be done in user code / the MCP layer?
+      description: |
+        Firmware is intentionally thin. If a host-side wrapper can do
+        it without firmware changes, prefer that. Convince us the
+        capability genuinely belongs at the HID layer.
+    validations:
+      required: true

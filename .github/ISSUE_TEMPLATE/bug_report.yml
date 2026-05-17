@@ -1,0 +1,76 @@
+name: Bug report
+description: Firmware crashes, protocol misbehavior, or wrong HID output
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing. Please fill out the sections below —
+        firmware bugs need more context than typical Python bugs.
+
+  - type: input
+    id: firmware_version
+    attributes:
+      label: Firmware version (printed at boot on the CDC console)
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: protocol_version
+    attributes:
+      label: clawtouch-hid-protocol Python module version
+      description: Output of `pip show clawtouch-hid-protocol | grep Version`
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: board
+    attributes:
+      label: Board + CircuitPython version
+      description: Board model and CircuitPython firmware version (cp_version on REPL).
+      placeholder: "Raspberry Pi Pico 2 RP2350, CircuitPython 10.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: host_os
+    attributes:
+      label: Host OS
+      placeholder: "Windows 11 / macOS 14.5 / Ubuntu 24.04"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: |
+        If possible, use `firmware/packet_parser.py` to construct the
+        byte sequence on a PC first — that tells us whether the bug is
+        in the parser or in the executor on the Pico.
+      placeholder: |
+        1. Flash firmware/code.py to a fresh Pico 2.
+        2. Send this byte sequence over USB-CDC data port:
+           `\xaa\x01\x00\x10\x05\x00...`
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: cdc_console
+    attributes:
+      label: CDC console output
+      description: |
+        Connect to the *first* CDC port (not the data port) at 115200
+        baud and paste the boot banner + any error messages.
+      render: shell

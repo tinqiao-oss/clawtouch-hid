@@ -1,0 +1,30 @@
+clawtouch-hid
+Copyright (c) 2026 Tinqiao Technology (Beijing) Co., Ltd.
+
+This product is licensed under the MIT License — see LICENSE for the full
+text.
+
+
+==============================================================================
+Third-party components bundled in this repository
+==============================================================================
+
+firmware/lib/adafruit_hid/
+    Adafruit CircuitPython HID library
+    Copyright (c) Adafruit Industries
+    Licensed under the MIT License
+    Upstream:  https://github.com/adafruit/Adafruit_CircuitPython_HID
+    Bundled here as pre-compiled `.mpy` files for convenience; identical to
+    the corresponding release on the Adafruit CircuitPython bundle. Users
+    who prefer to fetch a fresh copy may download it from
+    https://circuitpython.org/libraries and replace the `lib/adafruit_hid/`
+    folder.
+
+
+CircuitPython firmware image (not bundled in this repository)
+    The Raspberry Pi Pico 2 firmware (`.uf2`) referenced in
+    `docs/flash-guide.md` is not redistributed here. Please obtain it
+    directly from the official source:
+        https://circuitpython.org/board/raspberry_pi_pico2/
+    CircuitPython itself is licensed under the MIT License; see
+    https://github.com/adafruit/circuitpython for the upstream project.
