@@ -117,6 +117,18 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 外加 `ACK` 和 `ERROR`。完整字节级布局见
 [docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md)。
 
+## 无线传输(可选)
+
+默认情况下宿主通过上面的 USB-CDC 串口通道驱动板子。
+[`firmware-wifi/`](firmware-wifi/) 是给 Raspberry Pi Pico 2 **W** 的可选
+**双通道**固件:同一套冻结版 v1.0 协议,USB-CDC 和 Wi-Fi TCP server 两条
+通道并行接收。这样板子可以插在一台宿主上做 HID 输出,同时由一台 PC 隔着
+局域网发命令。
+
+HID 设备是**宿主无关**的 —— 它插着的宿主可以是 Windows / macOS / Linux
+PC,也可以是手机(安卓 / iOS)。详见
+[docs/wifi-transport.zh-CN.md](docs/wifi-transport.zh-CN.md)。
+
 ## 仓库布局
 
 ```
@@ -127,6 +139,7 @@ clawtouch-hid/
 │   ├── code.py               ← HID 执行器主循环
 │   ├── packet_parser.py      ← 帧提取器,无硬件依赖,可在 PC 上测
 │   └── lib/adafruit_hid/     ← 捆绑的 HID 库 (MIT,见 NOTICE)
+├── firmware-wifi/            ← 可选的 Wi-Fi 变体(Pico 2 W)— 见 docs/wifi-transport.zh-CN.md
 ├── docs/                     ← 协议 spec + 烧录指南(中英双语)
 ├── examples/                 ← 可运行的冒烟测试
 ├── pyproject.toml            ← 构建 clawtouch-hid-protocol 上 PyPI
