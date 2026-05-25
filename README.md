@@ -41,8 +41,8 @@ mouse and keyboard," start there — you don't need to read any of this. This
 repo is for **firmware hackers, protocol auditors, and anyone who wants to
 build their own host stack on top of the same hardware**.
 
-> 📦 MIT-licensed. No backend, no LLM, no input-pacing layer. Just the wire
-> protocol and the firmware that speaks it.
+> 📦 MIT-licensed. No backend, no LLM, no agent logic on top — just the
+> wire protocol and the firmware that speaks it.
 
 ## Why a physical HID device?
 
@@ -226,8 +226,9 @@ PRs are welcome for: documentation fixes, additional examples, new client
 language bindings against the v1.0 protocol, English translations,
 hardware compatibility reports.
 
-We're _not_ taking PRs for: input-pacing or behavioral-modeling layers
-(intentionally out of scope), protocol changes that break v1.0
+We're _not_ taking PRs for: agent-loop logic or application-level
+features (intentionally out of scope — firmware translates frames to
+HID reports, nothing else), protocol changes that break v1.0
 compatibility, or application-specific adapters (those live in the
 closed-source desktop app).
 

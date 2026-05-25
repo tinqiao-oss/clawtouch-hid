@@ -30,9 +30,9 @@ everyone's time.
   seq:u16 / cmd:u8 / plen:u16 / payload / csum:u8) and command opcodes
   are frozen as of 2026-03-15. We will close such PRs without review.
   New capabilities arrive as new opcodes inside the same envelope.
-- **Application-level features** in the firmware — input pacing,
-  behavior modeling, multi-step flows. Firmware translates frames to
-  HID reports; nothing else. Higher logic lives on the host.
+- **Application-level features** in the firmware. Firmware translates
+  frames to HID reports; nothing else. Multi-step flows, scheduling,
+  and any decision logic live on the host.
 - **Renumbering of existing opcodes** to "make them more sensible".
   The numbers are the spec. The Python `IntEnum` names exist only for
   readability.

@@ -45,10 +45,6 @@ We'll acknowledge within **3 business days**.
 
 - **Physical access to the device.** Anyone with the device can
   re-flash it; that's a feature, not a bug.
-- **Detection of automated input by third-party applications.** The
-  firmware generates real HID reports through the standard OS HID
-  driver path. Whether a specific application recognizes the input as
-  automated is out of scope and we make no claims either way.
 - **Behavior of agents / scripts that use this hardware.** If a
   Claude / OpenClaw / Hermes agent uses the HID device to do something
   the user didn't intend, that's an agent / prompt issue, not a
