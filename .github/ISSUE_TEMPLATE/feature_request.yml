@@ -18,7 +18,7 @@ body:
       options:
         - New opcode (additive, v1 envelope)
         - New HID profile (multi-touch, consumer control, etc.)
-        - New hardware port (Pico 2 W, ESP32, custom carrier)
+        - New hardware port (Adafruit Feather RP2350, ESP32, custom carrier)
         - Firmware refactor / performance
         - Tooling / build / docs
     validations:

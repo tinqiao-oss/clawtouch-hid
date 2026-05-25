@@ -26,11 +26,9 @@ separately on each release.
 
 ### Changed
 
-- **Docs / scope wording softened** to avoid framing the firmware as
-  an anti-detection layer. Rewrote scope paragraphs in both READMEs to
-  describe HID input neutrally (standard driver-stack routing, no
-  software on target) rather than in terms of how it compares to
-  detection systems.
+- **Docs / scope wording softened.** Rewrote scope paragraphs in both
+  READMEs to describe HID input neutrally — standard driver-stack
+  routing, no software on target.
 
 ## [1.0.0] — 2026-05-17 — First public release (protocol frozen 2026-03-15)
 
@@ -65,8 +63,8 @@ first public bundle shipping it.
 ### Known limitations
 
 - Only keyboard + mouse HID profiles — no multi-touch yet (planned).
-- Wired USB-CDC only; Wi-Fi / Bluetooth firmware variants for Pico 2 W
-  are on the roadmap but not in this release.
+- Wired USB-CDC transport only; wireless transports are out of scope
+  for this OSS release.
 - Firmware is CircuitPython-only. RP2350 MicroPython / C SDK ports
   would be welcome contributions but are not maintained upstream.
 

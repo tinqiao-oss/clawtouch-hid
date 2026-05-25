@@ -11,9 +11,9 @@ everyone's time.
   flash-guide updates for new CircuitPython versions, README
   translations (non-English).
 - **Hardware compatibility reports** — issues describing whether the
-  firmware works on other RP2350 boards (Pico 2 W, Adafruit Feather
-  RP2350, custom carriers). Include `boot.py` / `code.py` patches if
-  needed, board photos, and dmesg / device-manager output.
+  firmware works on other RP2350 boards (Adafruit Feather RP2350,
+  custom carriers). Include `boot.py` / `code.py` patches if needed,
+  board photos, and dmesg / device-manager output.
 - **Alternative protocol-module bindings** — `clawtouch_hid_protocol`
   is the canonical Python one; we'd happily link to Rust / Go / TS
   ports from the README. Open an issue and we'll discuss the
