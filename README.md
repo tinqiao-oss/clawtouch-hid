@@ -69,10 +69,10 @@ for a user who can't use a regular one), cross-machine workflows
 where the target machine must stay clean.
 
 Not suitable for: mass account creation or multi-account operations on
-consumer platforms (regulatory red line in most jurisdictions, and a
-single-host peripheral is the wrong shape anyway), or application-specific
-scripted shortcut layers (those belong in agent / RPA frameworks built
-on top of this primitive layer).
+consumer platforms (a single-host peripheral is the wrong shape; users
+are responsible for applicable laws and platform policies), or
+application-specific scripted shortcut layers (those belong in agent /
+RPA frameworks built on top of this primitive layer).
 
 ## Hardware
 
