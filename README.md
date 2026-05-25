@@ -133,19 +133,6 @@ Twelve command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL`,
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`, `STATUS_REQUEST/RESPONSE`, plus
 `ACK` and `ERROR`. Full byte-level layout in [docs/protocol-v1.md](docs/protocol-v1.md).
 
-## Wireless transport (optional)
-
-By default the host drives the board over the USB-CDC serial channel
-described above. [`firmware-wifi/`](firmware-wifi/) is an optional
-**dual-transport** build for the Raspberry Pi Pico 2 **W**: it accepts
-the same frozen v1.0 protocol over USB-CDC **and** over a Wi-Fi TCP
-server, in parallel. This lets the board be plugged into one host for
-HID output while a PC sends commands across the LAN.
-
-The HID device is **host-agnostic** — the host it plugs into can be a
-Windows / macOS / Linux PC or a phone (Android / iOS). See
-[docs/wifi-transport.md](docs/wifi-transport.md).
-
 ## Repository layout
 
 ```
@@ -156,7 +143,6 @@ clawtouch-hid/
 │   ├── code.py               ← HID executor main loop
 │   ├── packet_parser.py      ← Frame extractor, hardware-free for PC tests
 │   └── lib/adafruit_hid/     ← Bundled HID library (MIT, see NOTICE)
-├── firmware-wifi/            ← Optional Wi-Fi variant (Pico 2 W) — see docs/wifi-transport.md
 ├── docs/                     ← Protocol spec + flash guide (English + Chinese)
 ├── examples/                 ← Runnable smoke tests
 ├── pyproject.toml            ← Builds clawtouch-hid-protocol for PyPI

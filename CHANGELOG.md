@@ -11,21 +11,6 @@ separately on each release.
 
 ## [Unreleased]
 
-### Added
-
-- **`firmware-wifi/`** — optional dual-transport firmware variant for
-  the Raspberry Pi Pico 2 W. Accepts the frozen v1.0 protocol over the
-  existing USB-CDC channel **and** over a Wi-Fi TCP server, in
-  parallel, so the command channel and the HID-output channel no longer
-  have to terminate on the same host. Wi-Fi credentials are read from
-  `settings.toml`; any Wi-Fi failure degrades gracefully to USB-only.
-  Fulfils the "Wi-Fi firmware variant for Pico 2 W" item listed under
-  v1.0.0's known limitations. See
-  [`docs/wifi-transport.md`](docs/wifi-transport.md).
-- **`docs/wifi-transport.md`** / **`.zh-CN.md`** — Wi-Fi transport
-  guide: architecture, `settings.toml` configuration, host-side TCP
-  example, and how to locate the board on the network.
-
 ### Fixed
 
 - **`build_key_release()` now matches firmware + spec.** Previously
