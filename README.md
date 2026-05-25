@@ -187,7 +187,7 @@ are open, the integrated commercial product stays closed.
 | **clawtouch-hid** (this repo: firmware + protocol)     | ✅ Released              |
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ Released |
 | **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
-| Backend / desktop app / adapters / vision models       | 🔒 Closed source — [what's in it](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/docs/COMMERCIAL_PRODUCT.md) |
+| Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
 
 Star the org [@tinqiao-oss](https://github.com/tinqiao-oss) to follow new releases.
 
@@ -214,11 +214,9 @@ import time, so it cannot be run on a normal Python interpreter directly
 **How is this different from the closed-source ClawTouch desktop app?**
 This repo is the bottom layer only — raw HID primitives over a frozen
 wire protocol — so other agent stacks can use ClawTouch hardware
-without adopting the whole ClawTouch product. → For what the desktop
-product adds on top (vision, orchestration, app adapters, B2B layer),
-see
-[`COMMERCIAL_PRODUCT.md`](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/docs/COMMERCIAL_PRODUCT.md)
-in the `clawtouch-mcp` companion repo.
+without adopting the whole ClawTouch product. The closed-source
+desktop product is a separate agent that runs on top of the same
+hardware; contact `support@tinqiao.com` for details.
 
 ## Contributing
 

@@ -165,7 +165,7 @@ ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业�
 | **clawtouch-hid** (本仓库:固件 + 协议)           | ✅ 已发布             |
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ 已发布 |
 | **clawtouch-bridge-sdk** (Python + Node SDK)      | 🔵 规划中             |
-| 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — [详细对比](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/docs/COMMERCIAL_PRODUCT.zh-CN.md) |
+| 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
 
 关注组织 [@tinqiao-oss](https://github.com/tinqiao-oss) 接收新版本通知。
 
@@ -188,10 +188,8 @@ CircuitPython 上,因为它在 import 时就依赖板上的 `usb_hid` / `usb_cdc
 
 **跟闭源的 ClawTouch 桌面端有什么区别?**
 本仓库只是最底层 —— 纯 HID 原语 + 冻结线协议 —— 让其他 agent 框架
-能在不绑定 ClawTouch 完整产品的前提下使用硬件。→ 桌面端额外做什么
-(视觉识别 / 多步编排 / 应用适配器 / B2B 层), 完整分层对比 + 截图见
-[`COMMERCIAL_PRODUCT.zh-CN.md`](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/docs/COMMERCIAL_PRODUCT.zh-CN.md)
-(在 `clawtouch-mcp` 姊妹仓)。
+能在不绑定 ClawTouch 完整产品的前提下使用硬件。闭源桌面端是跑在同一
+套硬件之上的独立 agent, 邮件咨询 `support@tinqiao.com`。
 
 ## 参与贡献
 
