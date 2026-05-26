@@ -1,8 +1,28 @@
-"""ClawTouch HID firmware v1.0.0 — Raspberry Pi Pico 2.
+"""ClawTouch HID firmware v1.0.2 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data
 channel and executes the corresponding HID action. The firmware does
 nothing on its own — all decisions live on the host.
+
+v1.0.2 (2026-05-26, round 5 audit): main loop frame-sync uses
+``bytearray.find`` + ``del buf[:idx]`` instead of repeated ``buf.pop(0)``.
+``pop(0)`` is O(n) per call: a noisy or adversarial USB stream (long
+run of non-HEADER bytes) would memmove the entire buffer for every
+byte, stalling USB interrupt response. Behaviour is byte-for-byte
+identical, just bounded CPU usage on the worst case.
+
+v1.0.1 (2026-05-26, round 4 audit): four defensive fixes —
+``process_packet`` runs checksum verify on every frame (truncated frame
+returns ERR_INVALID_PAYLOAD instead of falling through); KEY_TYPE_STRING
+catches UnicodeDecodeError → ERR_INVALID_PAYLOAD (no more crash on
+malformed UTF-8); MOUSE_CLICK rejects unknown button codes with
+ERR_INVALID_PAYLOAD (was silently defaulting to LEFT_BUTTON and ACK-ing,
+making the host believe a right-click had landed when only a left-click
+happened); packet_parser switched from recursion to iteration (deep
+nested payloads can no longer raise RecursionError and lock the Pico).
+
+All v1.0.x revisions are wire-compatible with the v1.0 protocol —
+older hosts keep working unchanged, hid_firmware_min stays at "1.0.0".
 
 Framework: CircuitPython 10.x
 Hardware:  Raspberry Pi Pico 2 (RP2350)
@@ -26,7 +46,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.0.1"
+FIRMWARE_VERSION = "1.0.2"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
