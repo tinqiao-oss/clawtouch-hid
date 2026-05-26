@@ -11,6 +11,21 @@ separately on each release.
 
 ## [Unreleased]
 
+### Visual / docs uplift
+
+- **`docs/assets/hero.svg`** — flat-design hero diagram (host
+  program → Pico 2 + firmware → target OS) embedded at the top of
+  the English and Chinese READMEs. The right pane shows the frozen
+  v1.0 wire frame layout (preamble / seq / cmd / plen / payload /
+  csum) at a glance, with `Pico 2 + firmware` highlighted as the
+  this-repo node.
+- **New `## See it in action` section.** Annotated Python REPL
+  transcript using `clawtouch-hid-protocol` + `pyserial` against a
+  real Pico 2: PING/PONG handshake (with the 7 hex bytes of the
+  outgoing frame called out byte-by-byte for orientation), one
+  `MOUSE_CLICK`, one `KEY_TYPE_STRING`. Acts as a text-based demo
+  until a real screen-recording GIF lands.
+
 ### Compliance — second-pass audit (codex round 2)
 
 A follow-up codex audit on the first compliance pass surfaced six

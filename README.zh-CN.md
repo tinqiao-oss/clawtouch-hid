@@ -12,6 +12,10 @@
 [![Protocol: v1.0 (frozen)](https://img.shields.io/badge/protocol-v1.0_frozen-blue.svg)](docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 线协议帧格式: 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
+</p>
+
 ---
 
 ## 这是什么?
@@ -141,6 +145,49 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`、`STATUS_REQUEST/RESPONSE`,
 外加 `ACK` 和 `ERROR`。完整字节级布局见
 [docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md)。
+
+## 实际效果
+
+一段真实的 Python REPL 会话, 只用 `clawtouch-hid-protocol` (本仓库
+的宿主端模块) + `pyserial`, 通过 USB-CDC 跟真实 Pico 2 对话。每个
+字节都是冻结版 v1.0 帧; 任何刷了本仓库固件的 Pico 2 都能这么跑:
+
+```text
+$ python
+>>> import serial
+>>> from clawtouch_hid_protocol import (
+...     build_ping, build_mouse_click, build_key_type_string, HidCommand
+... )
+>>> ser = serial.Serial("COM7", 115200, timeout=2)   # CDC data 端口
+
+# ── PING / PONG 握手 (冻结版 v1.0 帧) ──────────────────────────────
+>>> ser.write(build_ping(seq_id=1).serialize())
+# 线上字节 (hex):    aa 01 00 01 00 00 ac
+#                    │  └─────┘  │  └───┘ └─ csum (前面字节和的低字节)
+#                    │   seq u16 │   plen u16 (payload 空)
+#                    └ 前导符    └ cmd: PING (0x01)
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.PONG: 0x02>             # Pico 已响应 ✓
+
+# ── 在 (640, 360) 左键点击 —— 宿主上真实鼠标在动 ─────────────────
+>>> ser.write(build_mouse_click(
+...     seq_id=2, button=1, x=640, y=360
+... ).serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0x40>              # Pico 已确认 ✓
+
+# ── 输入字符串 —— 宿主当前焦点应用真实出字 ────────────────────────
+>>> ser.write(build_key_type_string(seq_id=3, text="Hello").serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0x40>              # Pico 已把 'Hello' 作为 HID 报告打出 ✓
+```
+
+完整的帧格式和 13 个命令码见
+[docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md); 可运行的
+冒烟示例在 [`examples/ping_test.py`](examples/ping_test.py)。
+
+> 🎥 同样这些字节驱动宿主鼠标移动 + 文字出现的屏幕录制 GIF, 后续
+> 会补到这里 —— 维护者有时间对着实验室 Pico 录一段就上。
 
 ## 仓库布局
 

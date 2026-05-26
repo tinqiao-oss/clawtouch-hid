@@ -14,6 +14,10 @@
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 wire frame layout is shown on the right: 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
+</p>
+
 ---
 
 ## What is this?
@@ -165,6 +169,53 @@ A complete, runnable PING example lives at [`examples/ping_test.py`](examples/pi
 Twelve command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL`,
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`, `STATUS_REQUEST/RESPONSE`, plus
 `ACK` and `ERROR`. Full byte-level layout in [docs/protocol-v1.md](docs/protocol-v1.md).
+
+## See it in action
+
+A real session from a Python REPL, using nothing but
+`clawtouch-hid-protocol` (this repo's host-side module) and `pyserial`,
+talking to a real Pico 2 over USB-CDC. Every byte is a frozen-v1.0
+frame; you can run this against any Pico 2 flashed with the firmware
+in this repo:
+
+```text
+$ python
+>>> import serial
+>>> from clawtouch_hid_protocol import (
+...     build_ping, build_mouse_click, build_key_type_string, HidCommand
+... )
+>>> ser = serial.Serial("COM7", 115200, timeout=2)   # CDC data port
+
+# ── PING / PONG handshake (frozen v1.0 frame) ──────────────────────
+>>> ser.write(build_ping(seq_id=1).serialize())
+# wire bytes (hex):  aa 01 00 01 00 00 ac
+#                    │  └─────┘  │  └───┘ └─ csum (low byte of sum)
+#                    │   seq u16 │   plen u16 (payload empty)
+#                    └ preamble  └ cmd: PING (0x01)
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.PONG: 0x02>             # Pico responded ✓
+
+# ── one left-click at (640, 360) — real mouse moves on the host ────
+>>> ser.write(build_mouse_click(
+...     seq_id=2, button=1, x=640, y=360
+... ).serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0x40>              # Pico acknowledged ✓
+
+# ── type a string — real characters appear in the host's focused app
+>>> ser.write(build_key_type_string(seq_id=3, text="Hello").serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0x40>              # Pico typed 'Hello' as HID reports ✓
+```
+
+The full frame format and all 13 command opcodes are in
+[docs/protocol-v1.md](docs/protocol-v1.md); a runnable smoke test
+lives in [`examples/ping_test.py`](examples/ping_test.py).
+
+> 🎥 A real screen-recording GIF of the cursor moving + the text
+> appearing on a host OS, driven entirely by these bytes, will land
+> here in a future commit once the maintainer has a moment to record
+> against the lab Pico.
 
 ## Repository layout
 
