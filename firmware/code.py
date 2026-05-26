@@ -100,13 +100,20 @@ class HidExecutor:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "Too large")
             return
 
-        # Checksum verification
-        if len(data) >= 7 + payload_len:
-            expected_checksum = data[6 + payload_len]
-            actual_checksum = sum(data[:6 + payload_len]) & 0xFF
-            if actual_checksum != expected_checksum:
-                self._send_error(seq_id, ERR_CHECKSUM_MISMATCH, "Checksum")
-                return
+        # Checksum verification — MUST run for every frame. Previously
+        # the verify was inside ``if len(data) >= 7 + payload_len`` so
+        # a truncated frame fell straight through to the slice below
+        # (silently shorter than payload_len) and got dispatched. The
+        # main loop guarded this in practice but ``process_packet`` is
+        # public API and callable from tests / future entry points.
+        if len(data) < 7 + payload_len:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "Truncated")
+            return
+        expected_checksum = data[6 + payload_len]
+        actual_checksum = sum(data[:6 + payload_len]) & 0xFF
+        if actual_checksum != expected_checksum:
+            self._send_error(seq_id, ERR_CHECKSUM_MISMATCH, "Checksum")
+            return
 
         payload = data[6:6 + payload_len]
 
@@ -147,7 +154,14 @@ class HidExecutor:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "CLICK:2B")
             return
         button_code, flags = struct.unpack("BB", payload[:2])
-        button = MOUSE_BUTTON_MAP.get(button_code, Mouse.LEFT_BUTTON)
+        button = MOUSE_BUTTON_MAP.get(button_code)
+        if button is None:
+            # Unknown button code used to silently default to LEFT and
+            # ACK — the host then thought its right-click landed when
+            # actually a left-click happened. Spec §3.2 only defines
+            # 0x01 / 0x02 / 0x04.
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "btn")
+            return
         self.mouse.click(button)
         if flags & 0x01:
             # bit0 = double-click (per protocol-v1 §3.2). Adafruit HID's
@@ -187,7 +201,16 @@ class HidExecutor:
         self._send_ack(seq_id)
 
     def _handle_key_type(self, seq_id, payload):
-        text = payload.decode("utf-8")
+        # Malformed UTF-8 used to surface as UnicodeDecodeError → caught
+        # by the generic wrapper in process_packet and reported as
+        # ERR_EXECUTION_TIMEOUT, which made hosts retry as if the
+        # firmware had stalled. Spec §3.3 says malformed payload is
+        # ERR_INVALID_PAYLOAD.
+        try:
+            text = payload.decode("utf-8")
+        except UnicodeDecodeError:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "utf8")
+            return
         self.layout.write(text)
         self._send_ack(seq_id)
 

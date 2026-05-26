@@ -39,30 +39,48 @@ class PacketParser:
             yield packet
 
     def _try_extract(self) -> bytes | None:
-        """Try to extract one complete packet from the buffer head."""
-        # Frame sync: drop bytes until HEADER
-        while self._buf and self._buf[0] != HEADER:
-            self._buf.pop(0)
+        """Try to extract one complete packet from the buffer head.
 
-        # Need at least header(1) + seq(2) + cmd(1) + plen(2) = 6 bytes
-        if len(self._buf) < 6:
-            return None
+        Iterative: a noisy CDC line (or an attacker streaming N bogus
+        ``0xAA`` headers each with ``plen > MAX_PAYLOAD_LEN``) used to
+        recurse N times here, blowing the Pico's tiny CircuitPython
+        stack with ``RecursionError`` after ~1000 bogus headers. The
+        same resync now runs as a single ``while`` loop with O(1)
+        recursion depth.
+        """
+        while True:
+            # Frame sync: drop bytes until HEADER. ``find`` is one
+            # memcpy regardless of how many leading garbage bytes we
+            # have, vs the old ``pop(0)`` which was O(K²) on a
+            # K-byte garbage prefix (memmove per byte).
+            sync_idx = self._buf.find(HEADER)
+            if sync_idx < 0:
+                # No header in buffer at all — drop everything and wait
+                # for more bytes.
+                self._buf.clear()
+                return None
+            if sync_idx > 0:
+                del self._buf[:sync_idx]
 
-        payload_len = struct.unpack_from("<H", self._buf, 4)[0]
+            # Need at least header(1) + seq(2) + cmd(1) + plen(2) = 6 bytes
+            if len(self._buf) < 6:
+                return None
 
-        if payload_len > MAX_PAYLOAD_LEN:
-            # Invalid length: drop this HEADER and resync
-            self._buf.pop(0)
-            return self._try_extract()
+            payload_len = struct.unpack_from("<H", self._buf, 4)[0]
 
-        # Full packet = 6 byte preamble + payload + 1 byte checksum
-        total_len = 7 + payload_len
-        if len(self._buf) < total_len:
-            return None
+            if payload_len > MAX_PAYLOAD_LEN:
+                # Invalid length: drop this HEADER and resync (loop).
+                del self._buf[:1]
+                continue
 
-        packet = bytes(self._buf[:total_len])
-        self._buf = self._buf[total_len:]
-        return packet
+            # Full packet = 6 byte preamble + payload + 1 byte checksum
+            total_len = 7 + payload_len
+            if len(self._buf) < total_len:
+                return None
+
+            packet = bytes(self._buf[:total_len])
+            del self._buf[:total_len]
+            return packet
 
     def reset(self):
         """Clear the buffer."""

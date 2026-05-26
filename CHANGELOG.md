@@ -11,6 +11,53 @@ separately on each release.
 
 ## [Unreleased]
 
+### Fixed — internal deep audit (round 4)
+
+A clean-up audit (four parallel agents, no specific external prompt)
+surfaced ~5 firmware / spec issues on top of codex rounds 1-3. All
+fixed in this commit.
+
+- **`firmware/packet_parser.py::_try_extract` converted from
+  recursion to iteration.** A noisy CDC line — or an attacker
+  streaming N consecutive bogus `0xAA` headers each with
+  `plen > MAX_PAYLOAD_LEN` — used to recurse N times via the
+  `pop(0) → return self._try_extract()` tail call. CircuitPython
+  has no `sys.setrecursionlimit` lever and the Pico's stack is
+  tiny; ~1000 bogus headers in a burst produced `RecursionError`
+  and locked the firmware. Now: single `while True:` loop with
+  O(1) call depth. Also swapped `bytearray.pop(0)` (O(N) memmove
+  per byte) for `bytearray.find(HEADER)` + slice — drops the
+  resync cost on a K-byte garbage prefix from O(K²) to O(K).
+- **`firmware/code.py::process_packet` now mandatorily verifies
+  checksum.** The `if len(data) >= 7 + payload_len:` gate used to
+  skip checksum verify for truncated frames and silently dispatch
+  a (sliced-short) payload. The main loop guarded this in
+  practice, but `process_packet` is a public method also called
+  from tests. Truncated frames now return
+  `ERR_INVALID_PAYLOAD` ("Truncated").
+- **`KEY_TYPE_STRING` UTF-8 decode failures now return the correct
+  error code.** A malformed payload used to raise `UnicodeDecodeError`,
+  caught by the generic wrapper as `ERR_EXECUTION_TIMEOUT` — hosts
+  treated it as a transient firmware stall and retried. Spec §3.3
+  says malformed payload is `ERR_INVALID_PAYLOAD`; now reported as
+  such, with explicit `try/except UnicodeDecodeError`.
+- **`MOUSE_CLICK` unknown button code now returns an error instead
+  of silently defaulting to LEFT.** `MOUSE_BUTTON_MAP.get(button_code,
+  Mouse.LEFT_BUTTON)` used to swallow any garbage button code and
+  ACK a left click — host thought its right-click landed when
+  actually a left-click happened. Now: unknown button → no click,
+  `ERR_INVALID_PAYLOAD` returned to host.
+- **`examples/ping_test.py::_PICO_PIDS` set was dead code:** the
+  `or p.pid is not None` clause downstream accepted any non-None
+  PID, so the curated set was never consulted. Comment kept; the
+  set is now a docstring-only reference matching `bridge.py`'s
+  "VID-only" stance.
+
+(Companion fix on the host side: `clawtouch-mcp` v0.2.4 wires the
+`ErrorCode` returned by these handlers into its `last_error_detail`
+diagnostic so the agent sees the specific code name instead of a
+bare `ok=False`. See the matching CHANGELOG entry there.)
+
 ### Documented — firmware is relative-only (codex round 3 P0/P1 #1)
 
 - **`firmware/code.py` `_handle_mouse_move` flag semantics clarified.**
