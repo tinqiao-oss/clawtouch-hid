@@ -11,6 +11,27 @@ separately on each release.
 
 ## [Unreleased]
 
+### Docs trim
+
+- Removed redundant `🌐 clawtouch.cn` top-of-README link line.
+- Removed the "🎥 a real screen-recording GIF will land here..."
+  placeholder under `## See it in action`. The annotated REPL
+  transcript stands on its own; no GIF promise to deliver on.
+- Removed the "Star the org @tinqiao-oss to follow new releases."
+  sentence under `## Open source roadmap` — boilerplate, no info.
+- Rewrote the `## Hardware` purchase sentence. Was "You can buy
+  the turnkey ClawTouch device at clawtouch.cn, or grab a bare
+  Pico 2..." — the turnkey device is currently B2B-only and not
+  generally retail-available, so the parallel "or grab a Pico"
+  framing was misleading. Now reads "use any RP2350 board (e.g.
+  a Raspberry Pi Pico 2 from electronics retailers), flash this
+  firmware..." with a clean separation between this OSS path and
+  the separate commercial product.
+- **Added `clawtouch-skills` row to the `## Open source roadmap`
+  table** — was missing in this repo (present in `clawtouch-mcp`'s
+  roadmap table). Now all three open repos are listed in all
+  three READMEs consistently.
+
 ### Visual / docs uplift
 
 - **`docs/assets/hero.svg`** — flat-design hero diagram (host

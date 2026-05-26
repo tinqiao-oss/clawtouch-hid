@@ -7,8 +7,6 @@
 > protocol it speaks, and a Python definition module for hosts that want to
 > drive the board directly.
 
-🌐 **[clawtouch.cn](https://clawtouch.cn)** — official site for hardware, docs, and commercial inquiries.
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Protocol: v1.0 (frozen)](https://img.shields.io/badge/protocol-v1.0_frozen-blue.svg)](docs/protocol-v1.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
@@ -121,9 +119,11 @@ not to the firmware itself.
 | USB interfaces | HID (keyboard + mouse) + CDC (console + data) |
 | CDC baud rate | 115200 (data channel) |
 
-You can buy the turnkey ClawTouch device at [clawtouch.cn](https://clawtouch.cn),
-or grab a bare Pico 2 from any electronics retailer (~$8), flash it
-yourself, and you have an equivalent unit.
+You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
+electronics retailers), flash this firmware, and you have a working
+ClawTouch HID device. The turnkey commercial version with a finished
+enclosure is a separate product; this repository targets the
+hardware-level open source path.
 
 ## Quick start
 
@@ -212,11 +212,6 @@ The full frame format and all 13 command opcodes are in
 [docs/protocol-v1.md](docs/protocol-v1.md); a runnable smoke test
 lives in [`examples/ping_test.py`](examples/ping_test.py).
 
-> 🎥 A real screen-recording GIF of the cursor moving + the text
-> appearing on a host OS, driven entirely by these bytes, will land
-> here in a future commit once the maintainer has a moment to record
-> against the lab Pico.
-
 ## Repository layout
 
 ```
@@ -270,10 +265,9 @@ are open, the integrated commercial product stays closed.
 |--------------------------------------------------------|--------------------------|
 | **clawtouch-hid** (this repo: firmware + protocol)     | ✅ Released              |
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ Released |
+| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (markdown skill files for LLM agents) | ✅ Released |
 | **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
 | Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
-
-Star the org [@tinqiao-oss](https://github.com/tinqiao-oss) to follow new releases.
 
 ## FAQ
 

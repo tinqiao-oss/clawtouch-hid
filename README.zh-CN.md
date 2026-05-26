@@ -6,8 +6,6 @@
 > Raspberry Pi Pico 2 上的 CircuitPython 固件、它说的冻结版 USB-CDC 通信协议,
 > 以及给宿主端直接驱动这块板子用的 Python 协议模块。
 
-🌐 **[clawtouch.cn](https://clawtouch.cn)** — 官网,购买硬件 / 查文档 / 商务咨询都在这里。
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Protocol: v1.0 (frozen)](https://img.shields.io/badge/protocol-v1.0_frozen-blue.svg)](docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
@@ -99,8 +97,9 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 | USB 接口 | HID (键盘 + 鼠标) + CDC (console + data) |
 | CDC 波特率 | 115200 (data 通道) |
 
-你可以在 [clawtouch.cn](https://clawtouch.cn) 买成品 ClawTouch 设备,
-或者从任意电子件零售商买一块裸 Pico 2(¥55 起),自己烧固件,功能等价。
+你可以用任意 RP2350 板 (例如 Raspberry Pi Pico 2, ¥55 左右从电子件
+零售商可买), 烧上本仓库的固件, 就是一台能用的 ClawTouch HID 设备。
+成品商业版 (带外壳) 是独立产品; 本仓库聚焦硬件层的开源方案。
 
 ## 快速上手
 
@@ -186,9 +185,6 @@ $ python
 [docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md); 可运行的
 冒烟示例在 [`examples/ping_test.py`](examples/ping_test.py)。
 
-> 🎥 同样这些字节驱动宿主鼠标移动 + 文字出现的屏幕录制 GIF, 后续
-> 会补到这里 —— 维护者有时间对着实验室 Pico 录一段就上。
-
 ## 仓库布局
 
 ```
@@ -236,10 +232,9 @@ ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业�
 |---------------------------------------------------|-----------------------|
 | **clawtouch-hid** (本仓库:固件 + 协议)           | ✅ 已发布             |
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ 已发布 |
+| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (给 LLM agent 用的 markdown skill 文件) | ✅ 已发布 |
 | **clawtouch-bridge-sdk** (Python + Node SDK)      | 🔵 规划中             |
 | 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
-
-关注组织 [@tinqiao-oss](https://github.com/tinqiao-oss) 接收新版本通知。
 
 ## 常见问题
 
