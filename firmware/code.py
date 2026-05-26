@@ -26,7 +26,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.0.0"
+FIRMWARE_VERSION = "1.0.1"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
