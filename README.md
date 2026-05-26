@@ -182,7 +182,8 @@ in this repo:
 $ python
 >>> import serial
 >>> from clawtouch_hid_protocol import (
-...     build_ping, build_mouse_click, build_key_type_string, HidCommand
+...     build_ping, build_mouse_move, build_mouse_click,
+...     build_type_string, HidCommand, MouseButton,
 ... )
 >>> ser = serial.Serial("COM7", 115200, timeout=2)   # CDC data port
 
@@ -195,17 +196,21 @@ $ python
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
 <CommandType.PONG: 0x02>             # Pico responded ✓
 
-# ── one left-click at (640, 360) — real mouse moves on the host ────
->>> ser.write(build_mouse_click(
-...     seq_id=2, button=1, x=640, y=360
-... ).serialize())
+# ── move cursor 100px right, 50px down, then left-click ────────────
+# v1.0 firmware always treats (x, y) as RELATIVE — USB Boot Mouse has
+# no absolute-coordinate report. To click at a specific screen pixel,
+# the host must query the OS cursor position and send a delta.
+>>> ser.write(build_mouse_move(100, 50, relative=True, seq_id=2).serialize())
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
-<CommandType.ACK: 0x40>              # Pico acknowledged ✓
+<CommandType.ACK: 0xFE>              # cursor moved, Pico ACK'd ✓
+>>> ser.write(build_mouse_click(MouseButton.LEFT, seq_id=3).serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0xFE>              # Pico clicked ✓
 
 # ── type a string — real characters appear in the host's focused app
->>> ser.write(build_key_type_string(seq_id=3, text="Hello").serialize())
+>>> ser.write(build_type_string("Hello", seq_id=4).serialize())
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
-<CommandType.ACK: 0x40>              # Pico typed 'Hello' as HID reports ✓
+<CommandType.ACK: 0xFE>              # Pico typed 'Hello' as HID reports ✓
 ```
 
 The full frame format and all 13 command opcodes are in
