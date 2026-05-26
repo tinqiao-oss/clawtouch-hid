@@ -305,18 +305,29 @@ while True:
         if incoming:
             buf.extend(incoming)
 
-            # Extract complete frames
+            # Extract complete frames.
+            # Frame sync uses bytearray.find + del [:idx] instead of pop(0)
+            # in a loop: pop(0) is O(n) memmove per call. A noisy or
+            # adversarial USB stream (e.g. a long run of non-HEADER bytes)
+            # would spend CPU time linearly memmove-ing the whole buffer
+            # for each byte, stalling USB interrupt response on the Pico.
+            # find+del covers the same range in a single O(n) memmove.
+            # (round 4 fixed this in packet_parser.py; this main loop is
+            # the same-source bug that was missed there — round 5 fix.)
             while len(buf) >= 7:
-                # Frame sync: drop bytes until HEADER
-                while buf and buf[0] != HEADER:
-                    buf.pop(0)
-
-                if len(buf) < 6:
-                    break
+                if buf[0] != HEADER:
+                    idx = buf.find(HEADER)
+                    if idx < 0:
+                        buf = bytearray()
+                        break
+                    del buf[:idx]
+                    if len(buf) < 7:
+                        break
 
                 payload_len = struct.unpack_from("<H", buf, 4)[0]
                 if payload_len > MAX_PAYLOAD_LEN:
-                    buf.pop(0)
+                    # Skip this HEADER and resync from the next byte.
+                    del buf[:1]
                     continue
 
                 total_len = 7 + payload_len
