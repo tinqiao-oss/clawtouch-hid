@@ -11,6 +11,34 @@ separately on each release.
 
 ## [Unreleased]
 
+### Fixed — second-pass code audit (codex round 3)
+
+- **`firmware/code.py` — MOUSE_CLICK `flags` bit0 (double-click) was
+  silently dropped.** Protocol v1 §3.2 defines `bit0 = double-click`,
+  but the handler parsed `flags` and never branched on it, so
+  `hid.click(double=true)` was a silent single click. Now: if
+  `flags & 0x01`, the handler emits a second `mouse.click(button)`
+  after the first.
+- **`examples/ping_test.py` — `auto_detect_port()` opened the REPL
+  console of a dual-CDC Pico, not the data channel.** The function
+  used to return the first matching port from `comports()` ordering,
+  which on every OS exposes the lower-numbered (console) CDC
+  interface first; the framed PING then hit the REPL and timed out.
+  Now mirrors the dual-CDC handling that `clawtouch-mcp`'s
+  `list_pico_ports()` already does — group by `serial_number`,
+  return the highest-numbered port within the first group, fall back
+  gracefully on single-CDC firmwares.
+- **`NOTICE` — Adafruit bundle dates corrected + SHA-256 reproducibility
+  table added.** Previous text claimed v6.1.10 was the "most recent
+  release as of 2024-04-23"; per PyPI v6.1.10 actually shipped
+  2026-04-23, and our bundle (on or about 2026-03-20) predates it —
+  the closest tagged PyPI release at bundle time was v6.1.8
+  (2025-10-20). The exact upstream commit was not recorded at
+  vendoring time, so the NOTICE now: (a) lists the four nearby PyPI
+  release dates inline as a timeline; (b) records the byte-level
+  SHA-256 of each bundled `.mpy` file so future maintainers can
+  bisect the upstream commit if needed.
+
 ### Terminology
 
 - **Outward-facing copy: "LLM agent" → "AI agent"** in the README

@@ -139,6 +139,10 @@ class HidExecutor:
         button_code, flags = struct.unpack("BB", payload[:2])
         button = MOUSE_BUTTON_MAP.get(button_code, Mouse.LEFT_BUTTON)
         self.mouse.click(button)
+        if flags & 0x01:
+            # bit0 = double-click (per protocol-v1 §3.2). Adafruit HID's
+            # mouse.click is the smallest atomic unit; emit a second one.
+            self.mouse.click(button)
         self._send_ack(seq_id)
 
     def _handle_mouse_scroll(self, seq_id, payload):

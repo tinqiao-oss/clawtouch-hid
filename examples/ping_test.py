@@ -15,6 +15,8 @@ from __future__ import annotations
 import sys
 import time
 
+import re
+
 import serial                          # pip install pyserial
 import serial.tools.list_ports
 
@@ -27,14 +29,44 @@ from clawtouch_hid_protocol import (
 # Raspberry Pi USB VID; the Pico 2 advertises one of these PIDs
 _PICO_VID = 0x2E8A
 _PICO_PIDS = {0x0005, 0x000A, 0x000C, 0x0010}
+_PORT_NUM_RE = re.compile(r"(\d+)$")
+
+
+def _port_sort_key(device: str) -> int:
+    """Trailing integer of a port name (COM7 → 7, /dev/ttyACM3 → 3)."""
+    m = _PORT_NUM_RE.search(device or "")
+    return int(m.group(1)) if m else -1
 
 
 def auto_detect_port() -> str | None:
-    """Return the first port that looks like a Pico, else None."""
-    for p in serial.tools.list_ports.comports():
-        if p.vid == _PICO_VID and (p.pid in _PICO_PIDS or p.pid is not None):
-            return p.device
-    return None
+    """Return the data CDC port of the first Pico we find, else None.
+
+    The Pico firmware enables a composite USB device with TWO CDC
+    channels: a REPL **console** (lower-numbered port) and a **data**
+    channel (higher-numbered port) that speaks the framed HID
+    protocol. Both share VID/PID/serial — pyserial cannot tell them
+    apart. The correct port to PING is the highest-numbered one
+    within each shared-serial group; opening the console port and
+    sending HID frames hits the REPL and times out silently.
+
+    Single-CDC firmwares (or boards with only one port enumerated)
+    degrade gracefully — the sole port wins.
+    """
+    pico_ports = [
+        p for p in serial.tools.list_ports.comports()
+        if p.vid == _PICO_VID and (p.pid in _PICO_PIDS or p.pid is not None)
+    ]
+    if not pico_ports:
+        return None
+    # Group by serial_number; within each group the highest-numbered
+    # device is the data channel.
+    pico_ports.sort(key=lambda p: (p.serial_number or "", _port_sort_key(p.device)))
+    # The last entry of each serial-group sort wins, but we just want
+    # the first Pico's data port, so collapse to the highest of the
+    # first serial group:
+    first_serial = pico_ports[0].serial_number
+    same_pico = [p for p in pico_ports if p.serial_number == first_serial]
+    return max(same_pico, key=lambda p: _port_sort_key(p.device)).device
 
 
 def ping(port: str, *, timeout: float = 2.0) -> None:

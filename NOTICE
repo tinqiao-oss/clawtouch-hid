@@ -15,23 +15,41 @@ firmware/lib/adafruit_hid/
     Licensed under the MIT License
     SPDX-License-Identifier: MIT
     Upstream:  https://github.com/adafruit/Adafruit_CircuitPython_HID
-    Bundled version: vendored from upstream `main` branch on or about
-        2026-03-20 (see git log for `firmware/lib/adafruit_hid/__init__.mpy`
-        first-commit date). Closest stable upstream release at that time:
-        v6.1.10 (2024-04-23 — the most recent release Adafruit has cut for
-        this library). The vendored files in this repo are pre-compiled
-        `.mpy` bytecode generated from that source.
-    Bundled files: __init__.mpy / consumer_control.mpy /
-        consumer_control_code.mpy / keyboard.mpy / keyboard_layout_base.mpy
-        / keyboard_layout_us.mpy / keycode.mpy / mouse.mpy
+
+    Bundled on or about 2026-03-20 from the Adafruit CircuitPython
+    library bundle (https://circuitpython.org/libraries) — the bundle
+    is updated daily and tracks upstream `main`, not the per-library
+    PyPI tags. PyPI release timeline around the bundle date:
+        v6.1.7  — 2025-06-17
+        v6.1.8  — 2025-10-20   (latest PyPI tag at bundle time)
+        v6.1.9  — 2026-03-27   (one week after bundle, not included)
+        v6.1.10 — 2026-04-23   (current latest on PyPI)
+    The bundled .mpy files were generated from the library bundle on
+    or after v6.1.8 and may include `main`-branch commits between
+    v6.1.8 and the bundle date. The exact upstream commit hash was
+    not recorded at bundle time — see the SHA-256 table below for
+    byte-level reproducibility.
+
+    Bundled .mpy files (SHA-256 of bytecode as currently committed):
+        __init__.mpy                  5685dfd8e20a94b6908bfa27e890ec912fddaee1444f75a225c071595246cb11    (744 B)
+        consumer_control.mpy          261d6e629f0594256f5f314154949901619736f705ba620569c79e69c8ae0d9a    (625 B)
+        consumer_control_code.mpy     073cc71d0ad2c2c06ac202a6744c5d24734a857ffd5ce6d056ed4766ccf72007    (379 B)
+        keyboard.mpy                  93a1cc07fc840faa03ee4b97314931cd3ee3036ef08e2cd32d557d1d88c4288f    (1203 B)
+        keyboard_layout_base.mpy      9711f061e0fcc8d3d8d99300f04cb3558b6649e4701c63629e53897d4f018b78    (1216 B)
+        keyboard_layout_us.mpy       633b594700da02002936e4186ec4627530a51946430b3ccc7e3f01db85013e3b    (338 B)
+        keycode.mpy                   3624acda9cc8f2273f92dd4d6bc834b9d6ced82faa461a122f51c9eb1af431ca    (1978 B)
+        mouse.mpy                     ec4ea776032642c8084c82d8cbadcece8e6e94ef900abc739910b25360fcb009    (856 B)
+
     License copy: the upstream MIT license text is reproduced verbatim at
         firmware/lib/adafruit_hid/LICENSE in this repository, as required
         by the MIT license's attribution clause for redistributions.
+
     Replacement: users who prefer to fetch a fresh copy may download
         the latest Adafruit CircuitPython library bundle from
         https://circuitpython.org/libraries and replace the
-        `lib/adafruit_hid/` folder — but please retain the LICENSE file
-        when doing so.
+        `lib/adafruit_hid/` folder — please retain the LICENSE file
+        when doing so, and consider updating the SHA-256 table above
+        if you commit the replacement back to this repository.
 
 
 CircuitPython firmware image (not bundled in this repository)
