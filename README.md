@@ -74,6 +74,33 @@ are responsible for applicable laws and platform policies), or
 application-specific scripted shortcut layers (those belong in agent /
 RPA frameworks built on top of this primitive layer).
 
+## Acceptable use
+
+This firmware translates host-issued protocol frames into HID
+reports. It is **not** intended to, and you may not flash or
+configure it to:
+
+- Bypass, evade, or interfere with any target platform's anti-fraud,
+  anti-abuse, rate-limiting, or risk-control measures.
+- Operate accounts the user does not lawfully own or have explicit
+  authorization to operate.
+- Conduct activities prohibited by the target application's Terms
+  of Service in the user's jurisdiction.
+- Conduct activities that violate applicable law — including, but
+  not limited to, PRC *Anti-Unfair Competition Law* Art. 13 (as
+  amended 2025-10-15) on improper acquisition of others' data,
+  *Personal Information Protection Law*, *Cybersecurity Law*, and
+  equivalent laws in other jurisdictions.
+
+Users are independently responsible for evaluating their specific
+use case against applicable laws and the target platform's ToS.
+
+This repository contains no AI / ML model and generates no text,
+image, audio, or video content. Content-generation obligations
+(e.g. PRC *AI Generated Content Labeling Measure* effective
+2025-09-01) attach to whatever upstream agent drives this firmware,
+not to the firmware itself.
+
 ## Hardware
 
 | Item | Spec |
@@ -240,8 +267,16 @@ that stack.
 
 ## License
 
-MIT © Tinqiao Technology (Beijing) Co., Ltd. See [LICENSE](LICENSE) and
-[NOTICE](NOTICE).
+MIT © Tinqiao Technology (Beijing) Co., Ltd. — see [LICENSE](LICENSE)
+(English, authoritative) and [LICENSE.zh-CN.md](LICENSE.zh-CN.md)
+(non-official Chinese translation, for reference).
+
+Third-party components bundled in this repository (the Adafruit
+CircuitPython HID library) and their licenses are listed in
+[NOTICE](NOTICE). Trademarks (ClawTouch, Tinqiao, and third-party
+marks referenced in this repository) are covered separately in
+[TRADEMARKS.md](TRADEMARKS.md) — the MIT License does **not** grant
+any trademark rights.
 
 For commercial deployments at scale, enterprise support, or OEM hardware
 discussion: `support@tinqiao.com`.

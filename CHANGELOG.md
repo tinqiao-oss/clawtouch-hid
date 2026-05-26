@@ -11,6 +11,30 @@ separately on each release.
 
 ## [Unreleased]
 
+### Added
+
+- **`TRADEMARKS.md`** — bilingual (English + 简体中文) nominative
+  trademark notice covering Tinqiao-owned marks (ClawTouch, Tinqiao)
+  and third-party marks referenced for descriptive purposes
+  (Raspberry Pi, Pico 2, RP2350, CircuitPython, Adafruit, Claude,
+  Cline, OpenClaw, Hermes, USB, Windows, macOS, Linux). PRC
+  Trademark Law Art. 59 nominative-fair-use disclaimer included.
+- **`LICENSE.zh-CN.md`** — non-official Chinese translation of the
+  MIT License with explicit "English version prevails in case of
+  conflict" disclaimer; references PRC open-source contract-law
+  precedents and points to NOTICE for the bundled Adafruit HID
+  library.
+- **README `## Acceptable use` section** — explicit prohibition on
+  bypassing target platforms' anti-fraud / risk-control / rate-limit
+  measures and on operating accounts the user does not lawfully
+  own; references PRC *Anti-Unfair Competition Law* Art. 13 (as
+  amended 2025-10-15). Includes statement that this firmware
+  contains no AI/ML model and that AI-content-labeling obligations
+  attach to upstream agents, not to the firmware itself.
+- **README License section** — added cross-links to
+  `LICENSE.zh-CN.md` and `TRADEMARKS.md`; clarified that MIT does
+  not grant trademark rights.
+
 ### Fixed
 
 - **`build_key_release()` now matches firmware + spec.** Previously
