@@ -129,6 +129,16 @@ class HidExecutor:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "MOVE:5B")
             return
         x, y, flags = struct.unpack("<hhB", payload[:5])
+        # The protocol-v1 spec reserves the `flags` field's bit0 to
+        # distinguish relative vs absolute coordinates, but the v1.0
+        # firmware always treats (x, y) as a relative pixel delta —
+        # this is a hard constraint of USB HID Boot Mouse (which has
+        # no absolute-coordinate report). Absolute interpretation
+        # lives on the host side: clawtouch-mcp queries the OS cursor
+        # position and converts to a delta before sending. The flag
+        # is read here so the field stays addressable for a future
+        # firmware revision that switches to a HID Digitizer profile.
+        del flags  # explicitly unused at the v1.0 firmware layer
         self.mouse.move(x=x, y=y)
         self._send_ack(seq_id)
 

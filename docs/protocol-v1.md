@@ -89,7 +89,14 @@ All multi-byte integers are little-endian.
 
 **MOUSE_MOVE flags:**
 
-- bit0 = 1: relative; bit0 = 0: absolute
+- bit0: reserved for relative/absolute discrimination. **The v1.0
+  firmware ignores this bit and always treats `(x, y)` as a relative
+  pixel delta** — USB HID Boot Mouse, which this firmware implements,
+  has no absolute-coordinate report. Absolute interpretation is the
+  host's responsibility (e.g. `clawtouch-mcp` queries the OS cursor
+  position and converts to a delta). The flag stays in the wire
+  format so a future firmware revision targeting an HID Digitizer
+  profile can switch on it without renumbering opcodes.
 
 **MOUSE_CLICK button:**
 
@@ -97,7 +104,7 @@ All multi-byte integers are little-endian.
 
 **MOUSE_CLICK flags:**
 
-- bit0 = 1: double-click
+- bit0 = 1: double-click (firmware emits two `mouse.click` reports back-to-back)
 
 ### 3.3 Keyboard
 

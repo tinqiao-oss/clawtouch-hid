@@ -11,6 +11,28 @@ separately on each release.
 
 ## [Unreleased]
 
+### Documented — firmware is relative-only (codex round 3 P0/P1 #1)
+
+- **`firmware/code.py` `_handle_mouse_move` flag semantics clarified.**
+  Protocol v1 §3.2 previously read "bit0 = 1 relative, bit0 = 0
+  absolute" — but USB HID Boot Mouse (which this firmware
+  implements) has no absolute-coordinate report, so the firmware
+  always treated `(x, y)` as a relative delta no matter what bit0
+  said. This is now documented as the v1.0 invariant in both
+  `docs/protocol-v1.md` (English) and `docs/protocol-v1.zh-CN.md`
+  (Chinese): bit0 is reserved at the wire-format level for a future
+  firmware revision that targets an HID Digitizer profile, but the
+  v1.0 firmware ignores it. Absolute interpretation moves to the
+  host side — `clawtouch-mcp` v0.2.4 (next release) queries the OS
+  cursor and converts to a delta before sending. The firmware code
+  path drops the `flags` value with an explicit `del flags` and a
+  block comment, so static analysis won't flag it as an unused
+  binding and future maintainers see the design rationale inline.
+- **`docs/protocol-v1.md` and `docs/protocol-v1.zh-CN.md`** updated
+  to reword the MOUSE_MOVE flags table and to note that MOUSE_CLICK
+  bit0 = double-click is now correctly emitted by the firmware as
+  two back-to-back `mouse.click` reports (see the round-3 fix above).
+
 ### Fixed — second-pass code audit (codex round 3)
 
 - **`firmware/code.py` — MOUSE_CLICK `flags` bit0 (double-click) was

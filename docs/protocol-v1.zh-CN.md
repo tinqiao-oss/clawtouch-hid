@@ -85,7 +85,12 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 
 **MOUSE_MOVE flags:**
 
-- bit0 = 1: 相对移动;bit0 = 0: 绝对移动
+- bit0: 保留用于 relative/absolute 区分. **v1.0 固件忽略本 bit, 始终
+  把 `(x, y)` 当作相对像素 delta 处理** —— 本固件实现的是 USB HID
+  Boot Mouse, 该协议本身没有绝对坐标报告能力. 绝对坐标语义由 host
+  端负责 (例如 `clawtouch-mcp` 查询 OS 光标位置后换算成 delta). 本
+  字段在线协议中保留, 让未来某个改用 HID Digitizer profile 的固件
+  版本能直接启用而不必新增 opcode.
 
 **MOUSE_CLICK button:**
 
@@ -93,7 +98,7 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 
 **MOUSE_CLICK flags:**
 
-- bit0 = 1: 双击
+- bit0 = 1: 双击 (固件背靠背发两个 `mouse.click` 报告)
 
 ### 3.3 键盘命令
 
