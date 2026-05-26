@@ -19,11 +19,29 @@ affiliation without prior written permission:
 
 The `clawtouch-` PyPI / GitHub namespace and the `tinqiao-oss` GitHub
 organization name are project identifiers tied to the marks above.
-The wire protocol version string `ClawTouch HID v1.0` is a
-combined product mark + technical version identifier; technical
-interoperability under the frozen v1.0 spec is permitted under MIT,
-but commercial firmware distributions calling themselves "ClawTouch
-HID firmware" require written permission.
+The wire protocol version string `ClawTouch HID v1.0` is a combined
+product-mark + technical-version identifier.
+
+**The MIT License grants full rights to use, modify, and redistribute
+the source code, including for commercial purposes — and the MIT grant
+specifically permits anyone to implement the frozen v1.0 wire protocol
+in their own firmware.** The marks above are governed *separately* by
+trademark law and are **not** covered by the MIT grant. The two are
+independent: nothing in this trademark notice restricts code-level
+rights granted by MIT, and nothing in MIT grants trademark rights. In
+practice, commercial firmware distributions therefore must:
+
+- Not call themselves "ClawTouch HID firmware" or any similarly
+  confusing name that suggests endorsement, sponsorship, or shared
+  origin with Tinqiao Technology, without prior written permission.
+- Not use the `ClawTouch` / `Tinqiao` / `亭桥` marks in product
+  names, logos, or marketing material in a way that suggests an
+  official affiliation.
+
+Implementing the protocol under a clearly different product name,
+contributing patches back to this repository, or distributing
+unmodified copies of this repository with the original LICENSE and
+NOTICE intact, is not restricted by this notice.
 
 ## Third-party marks referenced in this repository
 
@@ -47,6 +65,30 @@ Tinqiao Technology and the trademark owner.
 | **Hermes Agent™** | Nous Research | README (downstream use example) |
 | **USB™** | USB Implementers Forum, Inc. | README, docs/protocol-v1.md (interface standard) |
 | **Windows™**, **macOS™**, **Linux™** | Microsoft / Apple / Linus Torvalds | README (target host platforms) |
+
+### Official trademark attribution
+
+Per the trademark policies of the following mark owners, we include
+the attribution statements they require:
+
+- **Raspberry Pi is a trademark of Raspberry Pi Ltd.** Raspberry Pi
+  Pico, Raspberry Pi Pico 2, and the RP2350 microcontroller are
+  trademarks of Raspberry Pi Ltd.
+- **CircuitPython is a trademark of Adafruit Industries.**
+- **USB Type-A, USB Type-C, and the USB Trident Logo are trademarks
+  of USB Implementers Forum, Inc.**
+- **Microsoft and Windows are trademarks of the Microsoft group of
+  companies.**
+- **macOS and Apple are trademarks of Apple Inc., registered in the
+  U.S. and other countries.**
+- **Linux is a registered trademark of Linus Torvalds in the U.S.
+  and other countries.**
+- **Claude is a trademark of Anthropic, PBC.**
+
+For the other marks listed in the table above, we use the form
+shown in the *Mark* column; if any rights holder prefers a different
+attribution wording, please email `support@tinqiao.com` (subject
+prefix `[Trademark]`) and we will update this notice.
 
 ## What this notice does NOT do
 
@@ -82,9 +124,21 @@ Co., Ltd.) 所有, **未经书面许可不得用于暗示赞助、推荐或关�
 
 `clawtouch-` 这一 PyPI / GitHub 命名空间和 `tinqiao-oss` GitHub
 组织名称是与上述商标关联的项目标识。线协议版本字符串
-`ClawTouch HID v1.0` 是产品商标 + 技术版本标识的组合; 按冻结版
-v1.0 spec 实现技术互操作在 MIT 范围内允许, 但商业固件分发若自称
-"ClawTouch HID firmware" 须取得书面许可。
+`ClawTouch HID v1.0` 是产品商标 + 技术版本标识的组合。
+
+**MIT 协议授予对源代码的完整权利, 包括商业用途的使用、修改和再
+分发 —— MIT 协议明确许可任何人在自己的固件中实现冻结版 v1.0
+线协议。** 上述商标受商标法**单独**规约, **不在** MIT 授权范围。
+两者相互独立: 本商标声明不限制 MIT 协议授予的代码层权利, MIT
+协议也不授予任何商标权利。因此实务上, 商业固件分发必须:
+
+- 不得在未取得书面许可的情况下自称 "ClawTouch HID firmware" 或
+  任何暗示与亭桥科技存在关联、推荐或共同来源的相似名称。
+- 不得在产品名称、logo、营销材料中使用 `ClawTouch` / `Tinqiao` /
+  `亭桥` 商标, 以免暗示官方关联关系。
+
+以明显不同的产品名称实现本协议、向本仓库提交补丁、或附带原版
+LICENSE 和 NOTICE 完整地分发本仓库的副本, 不受本声明限制。
 
 ### 本仓库中引用的第三方商标
 
@@ -104,6 +158,35 @@ v1.0 spec 实现技术互操作在 MIT 范围内允许, 但商业固件分发若
 | **Hermes Agent™** | Nous Research | README (下游使用示例) |
 | **USB™** | USB Implementers Forum, Inc. | README、docs/protocol-v1.md (接口标准) |
 | **Windows™** / **macOS™** / **Linux™** | Microsoft / Apple / Linus Torvalds | README (目标宿主平台) |
+
+### 商标持有人官方 attribution 语
+
+按以下商标持有人的官方政策要求, 在此明确商标归属声明 (商标
+attribution 是法律文本, 以下保留商标持有人指定的英文原文; 译注
+仅供理解):
+
+- **Raspberry Pi is a trademark of Raspberry Pi Ltd.** Raspberry Pi
+  Pico、Raspberry Pi Pico 2 和 RP2350 微控制器均为 Raspberry Pi
+  Ltd 的商标。
+- **CircuitPython is a trademark of Adafruit Industries.**
+  (CircuitPython 是 Adafruit Industries 的商标。)
+- **USB Type-A, USB Type-C, and the USB Trident Logo are trademarks
+  of USB Implementers Forum, Inc.** (USB Type-A、USB Type-C 和 USB
+  Trident Logo 是 USB Implementers Forum, Inc. 的商标。)
+- **Microsoft and Windows are trademarks of the Microsoft group of
+  companies.** (Microsoft 和 Windows 是微软集团公司的商标。)
+- **macOS and Apple are trademarks of Apple Inc., registered in the
+  U.S. and other countries.** (macOS 和 Apple 是 Apple Inc. 在美国
+  及其他国家注册的商标。)
+- **Linux is a registered trademark of Linus Torvalds in the U.S.
+  and other countries.** (Linux 是 Linus Torvalds 在美国及其他国家
+  的注册商标。)
+- **Claude is a trademark of Anthropic, PBC.** (Claude 是 Anthropic,
+  PBC 的商标。)
+
+上表中其他商标按 *商标* 列所示形式引用; 如任一权利人偏好不同的
+attribution 措辞, 请联系 `support@tinqiao.com` (邮件标题前缀
+`[Trademark]`), 我们将更新本声明。
 
 ### 本声明**不**做以下事
 

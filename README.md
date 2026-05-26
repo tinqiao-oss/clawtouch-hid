@@ -77,23 +77,29 @@ RPA frameworks built on top of this primitive layer).
 ## Acceptable use
 
 This firmware translates host-issued protocol frames into HID
-reports. It is **not** intended to, and you may not flash or
-configure it to:
+reports. This project does **not** support, document, or assist
+with use cases that:
 
 - Bypass, evade, or interfere with any target platform's anti-fraud,
   anti-abuse, rate-limiting, or risk-control measures.
 - Operate accounts the user does not lawfully own or have explicit
   authorization to operate.
-- Conduct activities prohibited by the target application's Terms
-  of Service in the user's jurisdiction.
-- Conduct activities that violate applicable law — including, but
-  not limited to, PRC *Anti-Unfair Competition Law* Art. 13 (as
-  amended 2025-10-15) on improper acquisition of others' data,
-  *Personal Information Protection Law*, *Cybersecurity Law*, and
-  equivalent laws in other jurisdictions.
+- Are prohibited by the target application's Terms of Service in
+  the user's jurisdiction.
+- Violate applicable law — including, but not limited to, PRC
+  *Anti-Unfair Competition Law* Art. 13 (the Internet sector
+  specific provision; promulgated 2025-06-27, effective
+  2025-10-15) covering improper means — including circumventing
+  technical management measures — to acquire or use another
+  operator's data; *Personal Information Protection Law*;
+  *Cybersecurity Law*; and equivalent laws in other jurisdictions.
 
-Users are independently responsible for evaluating their specific
-use case against applicable laws and the target platform's ToS.
+These statements describe the scope of our maintainer support and
+documentation — they are **not** additional restrictions on the
+MIT License, which continues to govern all use, modification, and
+redistribution of the source code. Users are independently
+responsible for evaluating their specific use case against
+applicable laws and the target platform's ToS.
 
 This repository contains no AI / ML model and generates no text,
 image, audio, or video content. Content-generation obligations

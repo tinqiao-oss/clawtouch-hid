@@ -11,14 +11,27 @@ Third-party components bundled in this repository
 
 firmware/lib/adafruit_hid/
     Adafruit CircuitPython HID library
-    Copyright (c) Adafruit Industries
+    Copyright (c) 2017 Scott Shawcroft for Adafruit Industries
     Licensed under the MIT License
+    SPDX-License-Identifier: MIT
     Upstream:  https://github.com/adafruit/Adafruit_CircuitPython_HID
-    Bundled here as pre-compiled `.mpy` files for convenience; identical to
-    the corresponding release on the Adafruit CircuitPython bundle. Users
-    who prefer to fetch a fresh copy may download it from
-    https://circuitpython.org/libraries and replace the `lib/adafruit_hid/`
-    folder.
+    Bundled version: vendored from upstream `main` branch on or about
+        2026-03-20 (see git log for `firmware/lib/adafruit_hid/__init__.mpy`
+        first-commit date). Closest stable upstream release at that time:
+        v6.1.10 (2024-04-23 — the most recent release Adafruit has cut for
+        this library). The vendored files in this repo are pre-compiled
+        `.mpy` bytecode generated from that source.
+    Bundled files: __init__.mpy / consumer_control.mpy /
+        consumer_control_code.mpy / keyboard.mpy / keyboard_layout_base.mpy
+        / keyboard_layout_us.mpy / keycode.mpy / mouse.mpy
+    License copy: the upstream MIT license text is reproduced verbatim at
+        firmware/lib/adafruit_hid/LICENSE in this repository, as required
+        by the MIT license's attribution clause for redistributions.
+    Replacement: users who prefer to fetch a fresh copy may download
+        the latest Adafruit CircuitPython library bundle from
+        https://circuitpython.org/libraries and replace the
+        `lib/adafruit_hid/` folder — but please retain the LICENSE file
+        when doing so.
 
 
 CircuitPython firmware image (not bundled in this repository)

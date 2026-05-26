@@ -11,6 +11,72 @@ separately on each release.
 
 ## [Unreleased]
 
+### Compliance — second-pass audit (codex round 2)
+
+A follow-up codex audit on the first compliance pass surfaced six
+issues, all fixed below. The compliance scope is unchanged; wording
+and packaging metadata are now stricter:
+
+- **`## Acceptable use` reworded to scope-of-support, not a use
+  restriction.** Replaced "you may not flash or configure it to"
+  with "this project does not support, document, or assist with".
+  Added an explicit sentence that the section describes maintainer
+  support scope only and is **not** an additional restriction on
+  top of the MIT License's grant of code-level rights. Avoids the
+  "MIT + use ban" structural conflict.
+- **PRC Anti-Unfair Competition Law Art. 13 dating corrected.**
+  Was "as amended 2025-10-15", which conflates promulgation and
+  effective dates. Now reads "promulgated 2025-06-27, effective
+  2025-10-15" (the latter is when the amendment takes effect, per
+  the SPC publication). The substantive description was also
+  broadened from the narrow "improper acquisition of others' data"
+  to the statutory phrasing covering circumvention of technical
+  management measures, fraud, and coercion as means.
+- **`firmware/lib/adafruit_hid/LICENSE` added** — the upstream MIT
+  license text for the bundled Adafruit CircuitPython HID library
+  (Copyright (c) 2017 Scott Shawcroft for Adafruit Industries),
+  reproduced verbatim from
+  https://github.com/adafruit/Adafruit_CircuitPython_HID/blob/main/LICENSE.
+  Required by the MIT license's attribution clause for
+  redistributions and previously absent from this repo (NOTICE
+  mentioned it but the actual license text was not bundled).
+- **`NOTICE` expanded for the Adafruit bundle.** Added: upstream
+  copyright holder name (Scott Shawcroft for Adafruit Industries),
+  SPDX identifier, vendoring date (on or about 2026-03-20),
+  reference to the closest upstream stable release at that time
+  (v6.1.10, 2024-04-23), the complete list of bundled `.mpy` files,
+  the relative path to the bundled LICENSE copy, and a note asking
+  contributors to retain the LICENSE when refreshing the bundle.
+- **`pyproject.toml` upgraded to PEP 639 license metadata.** Replaced
+  `license = { text = "MIT" }` (deprecated table form) with
+  `license = "MIT"` (SPDX expression). Added `license-files =
+  ["LICENSE", "LICENSE.zh-CN.md", "NOTICE", "TRADEMARKS.md"]` so the
+  four root-level legal documents ship in the PyPI sdist/wheel
+  `.dist-info/` directory. (The bundled
+  `firmware/lib/adafruit_hid/LICENSE` is intentionally excluded — the
+  `firmware/` tree is excluded from the PyPI distribution and the
+  file ships with the GitHub source tree only.) Bumped
+  `setuptools>=77` (PEP 639 baseline). Removed the legacy
+  `License :: OSI Approved :: MIT License` classifier per PyPA's PEP
+  639 migration guidance.
+- **TRADEMARKS — owned-mark policy reworded to separate copyright
+  and trademark grants.** The previous "interoperability under the
+  frozen v1.0 spec is permitted under MIT" wording was ambiguous and
+  could be read as making implementation rights flow from the
+  trademark notice. Now states explicitly that MIT grants full
+  commercial rights to the source code (including the right to
+  implement the wire protocol in third-party firmware), that the
+  marks are governed separately by trademark law, and that the only
+  practical constraint on commercial firmware distributions is the
+  trademark / naming requirement (do not call it "ClawTouch HID
+  firmware" without permission, do not imply endorsement).
+- **TRADEMARKS — official mark-owner attribution statements added.**
+  New `### Official trademark attribution` subsection cites the
+  attribution wording requested by Raspberry Pi Ltd., Adafruit
+  Industries, USB Implementers Forum, Microsoft, Apple, Linus
+  Torvalds (Linux), and Anthropic per their respective trademark
+  policies. Bilingual (English + 简体中文).
+
 ### Added
 
 - **`TRADEMARKS.md`** — bilingual (English + 简体中文) nominative
