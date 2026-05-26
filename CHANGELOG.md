@@ -11,6 +11,18 @@ separately on each release.
 
 ## [Unreleased]
 
+### Terminology
+
+- **Outward-facing copy: "LLM agent" → "AI agent"** in the README
+  Scope · Accessibility use case and the `## About` section. Tracks
+  the broader 2025 industry shift to "AI agent" as the default
+  outward-facing term (Anthropic / OpenAI / Cursor / Cline all
+  defaulted to it during 2024-2025).
+- **Technical / cross-link copy unchanged.** "LLM agents" retained
+  in the `clawtouch-skills` cross-link row on the Open source
+  roadmap (matches the skills repo's internal wording, since
+  markdown skills are LLM-specific by design).
+
 ### Docs trim
 
 - Removed redundant `🌐 clawtouch.cn` top-of-README link line.

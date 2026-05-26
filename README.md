@@ -66,7 +66,7 @@ automation tool**. If you want to drive ten machines you flash ten
 Picos.
 
 Suitable for: RPA / automated testing of devices you can't install
-software on, accessibility tooling (LLM agent + HID = real keyboard
+software on, accessibility tooling (AI agent + HID = real keyboard
 for a user who can't use a regular one), cross-machine workflows
 where the target machine must stay clean.
 
@@ -312,7 +312,7 @@ closed-source desktop app).
 
 `clawtouch-hid` is maintained by **Tinqiao Technology** — the team behind
 **ClawTouch** ([clawtouch.cn](https://clawtouch.cn)), building plug-in USB
-devices that let LLM agents operate real Windows / macOS / Linux desktops
+devices that let AI agents operate real Windows / macOS / Linux desktops
 at the HID layer. This repository is the open, hardware-layer slice of
 that stack.
 
