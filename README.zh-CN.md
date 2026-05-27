@@ -44,9 +44,17 @@ MCP server 跟它对话的硬件。如果你只想"让 Claude Desktop 控制真�
 
 大部分"AI 控制电脑"的 demo 都要求在目标机上跑 agent 进程,并走 OS 层
 合成输入 API。这类路径在 kiosk 锁机环境、嵌入式测试台架、跨设备 RPA
-等"目标机必须保持干净"的场景里有局限。USB HID 物理外设走标准 OS HID
-驱动栈,跟任何插上的键盘鼠标走同一条数据通路 —— 目标机零安装。本仓库
-里的固件就是把一块 ¥55 的 Pico 2 变成这种外设需要的最少代码。
+等"目标机 HID 输入侧必须保持干净"的场景里有局限。USB HID 物理外设走
+标准 OS HID 驱动栈,跟任何插上的键盘鼠标走同一条数据通路 —— 目标机
+不需要安装任何鼠标键盘驱动或 HID agent 进程, Pico 是 standard USB HID
+class, OS 原生识别。本仓库里的固件就是把一块 ¥55 的 Pico 2 变成这种
+外设需要的最少代码。
+
+> ⚠️ 本仓库只覆盖**输入侧**: 协议帧 → HID 报告。视觉反馈 (agent 看屏)
+> 不在本仓库范围 —— 本机模式下抓 agent 所在机的屏即可, 跨机模式下需要
+> 自行配 HDMI 采集卡 / VNC / API 验证 / 盲控. 完整部署模式区分见
+> [`clawtouch-mcp`](https://github.com/tinqiao-oss/clawtouch-mcp) README
+> 「部署模式」一节。
 
 ## 适用范围 —— 一台设备只对应一个目标
 

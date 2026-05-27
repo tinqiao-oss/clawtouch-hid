@@ -50,12 +50,22 @@ build their own host stack on top of the same hardware**.
 
 Most "AI controls your computer" demos run inside a sandbox or inject
 synthetic events through OS-level APIs. Those paths don't apply in
-locked-down kiosks, embedded test harnesses, or cross-machine RPA where
-the target machine must stay clean. A USB HID peripheral routes input
-through the standard OS HID driver stack — the same path as any plug-in
-keyboard or mouse — and needs zero software installed on the target.
+locked-down kiosks, embedded test harnesses, or cross-machine RPA
+where the target's HID-input side must stay clean. A USB HID
+peripheral routes input through the standard OS HID driver stack —
+the same path as any plug-in keyboard or mouse — and needs no
+mouse/keyboard driver or HID agent installed on the target (the Pico
+is a standard USB HID class device, recognized natively by every OS).
 The firmware in this repository is the smallest amount of code that
 turns a $8 Pico 2 into exactly that kind of peripheral.
+
+> ⚠️ This repo covers the **input side only**: protocol frames → HID
+> reports. Visual feedback (the agent reading the screen) is out of
+> scope — in local mode it captures the agent's own screen; in
+> cross-host mode you wire up a separate path (HDMI capture / VNC /
+> API checkpoints / blind operation). See the "Deployment modes"
+> section in [`clawtouch-mcp`](https://github.com/tinqiao-oss/clawtouch-mcp)
+> README for the full breakdown.
 
 ## Scope — one device, one target
 
