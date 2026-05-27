@@ -11,6 +11,15 @@ separately on each release.
 
 ## [Unreleased]
 
+### Fixed — README typo (external audit, codex)
+
+- `README.md:169` — protocol summary said "Twelve command codes" but
+  the `CommandType` enum defines **thirteen** opcodes (PING, PONG,
+  MOUSE_MOVE, MOUSE_CLICK, MOUSE_SCROLL, KEY_PRESS, KEY_RELEASE,
+  KEY_TYPE_STRING, KEY_COMBO, STATUS_REQUEST, STATUS_RESPONSE, ACK,
+  ERROR). `README.md:216` already says "13 command opcodes"; this fix
+  makes line 169 consistent.
+
 ### Fixed — internal deep audit (round 4)
 
 A clean-up audit (four parallel agents, no specific external prompt)

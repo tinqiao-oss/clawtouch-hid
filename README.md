@@ -166,7 +166,7 @@ A complete, runnable PING example lives at [`examples/ping_test.py`](examples/pi
 * `csum` is the low byte of the sum of all preceding bytes.
 * Maximum payload length is 1024 bytes.
 
-Twelve command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL`,
+Thirteen command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL`,
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`, `STATUS_REQUEST/RESPONSE`, plus
 `ACK` and `ERROR`. Full byte-level layout in [docs/protocol-v1.md](docs/protocol-v1.md).
 
