@@ -274,6 +274,36 @@ are open, the integrated commercial product stays closed.
 | **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
 | Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
 
+## Related work
+
+ClawTouch is not the first project to put HID hardware between an
+agent and a target PC. The closest neighbors:
+
+* **[PiKVM Pico HID](https://docs.pikvm.org/pico_hid/)** — Pi-Pico-as-HID-relay
+  for remote-management KVMs. RP2040 only (Pico 2 / RP2350 unsupported
+  as of writing); serves a KVM web UI, not an agent. No
+  wire-protocol versioning — host writes raw HID descriptors.
+* **[`sjmf/kvm-serial`](https://github.com/sjmf/kvm-serial)** + the MCP
+  wrapper **[`sunasaji/mcp-serial-hid-kvm`](https://github.com/sunasaji/mcp-serial-hid-kvm)** —
+  CH9329 / CH9350L USB-HID ASICs plus a video-capture card, with an
+  optional MCP server on top. The closest direct peer in architecture.
+  Uses fixed-function chips (firmware not user-modifiable); ClawTouch
+  instead pairs a Pico 2 with CircuitPython behind a frozen-v1.0 wire
+  protocol, so new opcodes are additive across hosts and the firmware
+  stays auditable.
+* **[HIDAgent](https://arxiv.org/abs/2602.00492)** — Bigham et al.
+  (CMU, 2026-01). A < $30 Raspberry Pi Pico + CircuitPython research
+  toolkit for UI agents driving HID-compatible devices. The closest
+  peer in hardware budget and design intent; ships a Python library
+  rather than a versioned wire protocol + MCP server + skill catalog.
+
+If your target is the *same* machine the agent runs on,
+[`AB498/computer-control-mcp`](https://github.com/AB498/computer-control-mcp),
+[`domdomegg/computer-use-mcp`](https://github.com/domdomegg/computer-use-mcp),
+or the various `mcp-pyautogui` implementations will be simpler — they
+call PyAutoGUI in-process. ClawTouch is for the cross-device case where
+the agent and the target are different machines.
+
 ## FAQ
 
 **Do I need ClawTouch's hardware to use this?**

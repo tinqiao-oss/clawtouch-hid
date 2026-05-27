@@ -11,6 +11,19 @@ separately on each release.
 
 ## [Unreleased]
 
+### Added — Related Work section in README (EN + zh-CN)
+
+New `## Related work` / `## 相关工作` section between "Open source
+roadmap" and "FAQ" positions this repo against
+[PiKVM Pico HID](https://docs.pikvm.org/pico_hid/),
+[`sjmf/kvm-serial`](https://github.com/sjmf/kvm-serial) +
+[`sunasaji/mcp-serial-hid-kvm`](https://github.com/sunasaji/mcp-serial-hid-kvm)
+(the closest direct architectural peer — fixed-function ASIC instead
+of user-modifiable Pico firmware), and CMU's
+[HIDAgent](https://arxiv.org/abs/2602.00492) (closest peer in hardware
+budget and design intent). Avoids any "first / only" claims that would
+ignore prior art.
+
 ### Fixed — README typo (external audit, codex)
 
 - `README.md:169` — protocol summary said "Twelve command codes" but

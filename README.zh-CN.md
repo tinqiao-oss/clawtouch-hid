@@ -236,6 +236,31 @@ ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业�
 | **clawtouch-bridge-sdk** (Python + Node SDK)      | 🔵 规划中             |
 | 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
 
+## 相关工作
+
+ClawTouch 不是第一个在 AI agent 和目标机之间塞 HID 硬件的项目。最相近的几个:
+
+* **[PiKVM Pico HID](https://docs.pikvm.org/pico_hid/)** —— Pi-Pico-as-HID-relay
+  的开创者, 服务于远程运维 KVM 场景。**仅支持 RP2040** (写本节时 Pico 2 /
+  RP2350 未列入), 提供 KVM Web UI 不是 agent 接口, 线协议无版本管理 —
+  宿主直写 raw HID descriptor。
+* **[`sjmf/kvm-serial`](https://github.com/sjmf/kvm-serial)** + 其 MCP 封装
+  **[`sunasaji/mcp-serial-hid-kvm`](https://github.com/sunasaji/mcp-serial-hid-kvm)** ——
+  用 CH9329 / CH9350L 现成 USB-HID ASIC + 视频采集卡, 上层带可选 MCP server。
+  **架构上最直接的同类项目**。用固化功能芯片 (固件不可自定义); ClawTouch
+  改用 Pico 2 + CircuitPython, 走冻结 v1.0 线协议, 新增 opcode 对老宿主
+  向前兼容, 固件本身可审计可改。
+* **[HIDAgent](https://arxiv.org/abs/2602.00492)** —— CMU 的 Bigham 等人,
+  2026-01 发布。< $30 的 Raspberry Pi Pico + CircuitPython 研究 toolkit,
+  专门让 UI agent 通过物理 HID 驱动目标机。**硬件预算和设计意图上最相近的
+  学术同行**; 配套是 Python 库, 不带版本化线协议 / MCP server / skill 仓库。
+
+如果你的目标机就是 agent 本机, 用
+[`AB498/computer-control-mcp`](https://github.com/AB498/computer-control-mcp)、
+[`domdomegg/computer-use-mcp`](https://github.com/domdomegg/computer-use-mcp) 或
+各种 `mcp-pyautogui` 实现会更轻 —— 它们在进程内调 PyAutoGUI。ClawTouch
+针对的是**跨设备**场景: agent 和目标机不是同一台。
+
 ## 常见问题
 
 **必须买 ClawTouch 硬件才能用吗?**
