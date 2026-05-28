@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """ClawTouch HID wire protocol v1.1.
 
 v1.0 baseline frozen on 2026-03-15. v1.1 (2026-05-28) adds two opcodes for

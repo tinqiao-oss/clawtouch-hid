@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """ClawTouch HID v1.1 wire protocol — host-side definitions.
 
 Public surface re-exported from :mod:`clawtouch_hid_protocol.protocol`.

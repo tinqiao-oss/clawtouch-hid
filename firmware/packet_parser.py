@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """Frame extractor for the ClawTouch HID v1.0 wire protocol.
 
 Hardware-free — runs on any Python interpreter. Use it to test the

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """USB descriptor setup for the ClawTouch HID firmware.
 
 Runs once at boot on the Pico 2. Enables a composite USB device:
@@ -20,3 +22,9 @@ usb_hid.enable(
 
 # Two CDC channels: console (default REPL) + data (protocol command channel)
 usb_cdc.enable(console=True, data=True)
+
+# Provenance marker (boot.py runs before CDC0 is live, so the user-visible
+# console banner lives in code.py). Kept here so anyone diffing boot.py
+# of a re-flashed unit still sees the upstream identity.
+#   clawtouch-hid firmware · Tinqiao Technology · MIT
+#   github.com/tinqiao-oss/clawtouch-hid

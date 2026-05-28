@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """End-to-end drag smoke test for protocol v1.1.
 
 Verifies the new MOUSE_BUTTON_DOWN (0x13) / MOUSE_BUTTON_UP (0x14)

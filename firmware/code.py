@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """ClawTouch HID firmware v1.1.0 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data
@@ -331,6 +333,22 @@ class HidExecutor:
         if self.serial_out:
             self.serial_out.write(packet)
 
+
+# ════════════════════════════════════════════════════════════════════
+# Console banner (CDC0 / REPL)
+# Printed once at startup. Visible via `mpremote connect auto repl`,
+# screen /dev/cu.usbmodemXXX, PuTTY on the console COM port, etc.
+# Provenance line travels with the binary — anyone reverse-engineering
+# a flashed unit sees the upstream identity in the CDC console.
+# ════════════════════════════════════════════════════════════════════
+
+print()
+print(" ╔═╗╦  ╔═╗╦ ╦╦═╗╔═╗╦ ╦╔═╗╦ ╦")
+print(" ║  ║  ╠═╣║║║ ║ ║ ║║ ║║  ╠═╣")
+print(" ╚═╝╩═╝╩ ╩╚╩╝ ╩ ╚═╝╚═╝╚═╝╩ ╩")
+print(" clawtouch-hid firmware v" + FIRMWARE_VERSION + " · Tinqiao Technology")
+print(" MIT · github.com/tinqiao-oss/clawtouch-hid")
+print()
 
 # ════════════════════════════════════════════════════════════════════
 # Main loop (CircuitPython entry point)

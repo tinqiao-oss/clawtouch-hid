@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """PacketParser state-machine tests (hardware-free firmware unit).
 
 The parser is what runs on the Pico — feeding it byte streams in

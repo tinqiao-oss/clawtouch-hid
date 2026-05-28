@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
 """End-to-end smoke test: PING the ClawTouch HID firmware over USB CDC.
 
 Usage:
