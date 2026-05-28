@@ -1,9 +1,11 @@
 **English** | [简体中文](protocol-v1.zh-CN.md)
 
-# ClawTouch HID Wire Protocol v1.0 (Frozen)
+# ClawTouch HID Wire Protocol v1.1
 
-> **Status:** v1.0 — frozen
-> **Frozen on:** 2026-03-15
+> **Status:** v1.1 — additive over v1.0 frozen baseline
+> **v1.0 frozen:** 2026-03-15 (existing opcodes are byte-for-byte stable forever)
+> **v1.1 added:** 2026-05-28 (`MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` for independent
+> press/release — required for drag gestures and Anthropic Computer Use compatibility)
 > **Scope:** Host (PC) ↔ ClawTouch HID device (Raspberry Pi Pico 2)
 
 ---
@@ -81,11 +83,13 @@ All multi-byte integers are little-endian.
 
 ### 3.2 Mouse
 
-| Command       | Code   | Payload                              | Notes |
-|---------------|--------|--------------------------------------|-------|
-| MOUSE_MOVE    | `0x10` | `[x:int16 LE] [y:int16 LE] [flags:uint8]` | Move pointer |
-| MOUSE_CLICK   | `0x11` | `[button:uint8] [flags:uint8]`       | Click |
-| MOUSE_SCROLL  | `0x12` | `[delta:int16 LE]`                   | Wheel scroll |
+| Command            | Code   | Payload                              | Since | Notes |
+|--------------------|--------|--------------------------------------|-------|-------|
+| MOUSE_MOVE         | `0x10` | `[x:int16 LE] [y:int16 LE] [flags:uint8]` | v1.0 | Move pointer |
+| MOUSE_CLICK        | `0x11` | `[button:uint8] [flags:uint8]`       | v1.0 | Press + release (atomic) |
+| MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | Wheel scroll |
+| MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | Press, no release (drag start) |
+| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | Release (drag end / panic stop) |
 
 **MOUSE_MOVE flags:**
 
@@ -105,6 +109,19 @@ All multi-byte integers are little-endian.
 **MOUSE_CLICK flags:**
 
 - bit0 = 1: double-click (firmware emits two `mouse.click` reports back-to-back)
+
+**MOUSE_BUTTON_DOWN / MOUSE_BUTTON_UP (v1.1):**
+
+- 1-byte payload: the button code (same encoding as `MOUSE_CLICK`).
+- `BUTTON_DOWN` presses the button and does **not** release it. Subsequent
+  `MOUSE_MOVE` frames produce a held-button drag.
+- `BUTTON_UP` releases the named button. `BUTTON_UP` on a button that wasn't
+  pressed is a no-op (idempotent, no error).
+- A drag is `BUTTON_DOWN(left)` → one or more `MOUSE_MOVE` → `BUTTON_UP(left)`.
+  `clawtouch-mcp` exposes this composition as the single `hid.drag` tool;
+  the wire protocol stays primitive on purpose.
+- `KEY_RELEASE(0, 0)` (release-all) also releases held mouse buttons —
+  panic-stop semantics unchanged from v1.0.
 
 ### 3.3 Keyboard
 

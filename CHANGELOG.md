@@ -3,11 +3,61 @@
 All notable changes to `clawtouch-hid` (firmware + protocol module) are
 documented here.
 
-Wire-protocol changes follow a **frozen v1.0 contract** — new commands
+Wire-protocol changes follow a **frozen v1.0 baseline** — new commands
 arrive as new opcodes inside the same envelope, never as breaking
 edits to existing ones. The `clawtouch-hid-protocol` Python package
-tracks the protocol version (`1.0.0`); the firmware version is tagged
+tracks the protocol version; the firmware version is tagged
 separately on each release.
+
+## [1.1.0] — 2026-05-28 — Independent mouse button press/release (drag gestures + CUA compatibility)
+
+### Added — protocol v1.1: `MOUSE_BUTTON_DOWN` (0x13) / `MOUSE_BUTTON_UP` (0x14)
+
+Two new opcodes let a host program press a mouse button without
+immediately releasing it (and release without pressing). v1.0
+`MOUSE_CLICK` is atomic (press + release in one frame) and remains
+unchanged — old hosts keep working.
+
+Wire payload for both: single byte `[button:u8]`, same encoding as
+`MOUSE_CLICK` (`0x01` LEFT / `0x02` RIGHT / `0x04` MIDDLE).
+
+**Why this exists**:
+- A *drag* in the physical sense is `BUTTON_DOWN` → one or more `MOUSE_MOVE`
+  → `BUTTON_UP`. With only `MOUSE_CLICK` (atomic press+release), a host
+  could not produce a drag at the wire layer.
+- The Anthropic Computer Use action set includes `left_mouse_down` /
+  `left_mouse_up` / `left_click_drag`. v1.1 lets a `clawtouch-mcp`
+  server bridge those actions one-for-one. See
+  `clawtouch-mcp` v0.3.0 release notes for the corresponding tool
+  surface (`hid.mouse_button_down`, `hid.mouse_button_up`, `hid.drag`).
+
+**Firmware semantics**:
+- `BUTTON_UP` on a button that wasn't pressed is a **no-op** (idempotent,
+  no error). This matches HID Boot Mouse behaviour and avoids spurious
+  `ERR_INVALID_PAYLOAD` when a host releases defensively.
+- `KEY_RELEASE(0, 0)` (release-all) still releases held mouse buttons —
+  panic-stop semantics from v1.0 unchanged.
+
+**Spec status**: v1.1 — additive over v1.0 frozen baseline. v1.0
+opcodes are byte-for-byte stable forever (no renumbers, no payload
+edits). Hosts speaking v1.0 keep working against v1.1 firmware; hosts
+speaking v1.1 against v1.0 firmware get `ERR_UNKNOWN_COMMAND` (0x01) on
+the new opcodes and can fall back to `MOUSE_CLICK`.
+
+### Changed
+
+- `clawtouch_hid_protocol.PROTOCOL_VERSION`: `1.0.0` → `1.1.0`
+- Firmware version: `1.0.2` → `1.1.0` (both `firmware/code.py` and the
+  deploy package's `code.py` synced)
+- `docs/protocol-v1.{md,zh-CN.md}`: §3.2 Mouse table gains two rows
+  with `Since v1.1`; new sub-section spells out the drag composition
+  pattern and idempotent-release semantics
+- README "Wire protocol at a glance": "Thirteen command codes" →
+  "Fifteen command codes" (English + Chinese)
+- New protocol roundtrip tests
+  (`test_mouse_button_down_v11` / `test_mouse_button_up_v11` /
+  `test_mouse_button_opcodes_locked_at_13_14`) — lock the 0x13/0x14
+  opcode numbering so any future renumber breaks CI
 
 ## [Unreleased]
 

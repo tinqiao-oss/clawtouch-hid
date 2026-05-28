@@ -1,9 +1,13 @@
-"""Wire protocol v1.0 — locked frame layout.
+"""Wire protocol v1.1 — locked frame layout (additive over v1.0 frozen baseline).
 
-THIS TEST FILE IS A CONTRACT. v1.0 is frozen (2026-03-15). If a test
-here fails, you are either:
+THIS TEST FILE IS A CONTRACT. v1.0 (frozen 2026-03-15) opcodes never
+change. v1.1 (added 2026-05-28: MOUSE_BUTTON_DOWN=0x13 / MOUSE_BUTTON_UP=0x14)
+opcodes also lock at the values asserted here. If a test in this file
+fails, you are either:
   (a) breaking compatibility with deployed firmware → revert the change
-  (b) intentionally proposing v2.0 → discuss in an RFC issue first
+  (b) renumbering v1.0/v1.1 opcodes (will break sync_check + every
+      shipped Pico in the field) → do not do this
+  (c) intentionally proposing v2.0 → discuss in an RFC issue first
 
 Either way: do not "fix" the test. The numbers in this file are the
 binary protocol spec.
@@ -34,8 +38,11 @@ from clawtouch_hid_protocol import (
 
 
 class TestSpecConstants:
-    def test_protocol_version_is_1_0_0(self):
-        assert PROTOCOL_VERSION == "1.0.0"
+    def test_protocol_version_is_1_1_0(self):
+        # v1.0 baseline frozen 2026-03-15; v1.1 (2026-05-28) added
+        # MOUSE_BUTTON_DOWN/UP for drag gestures + CUA compatibility.
+        # v1.0 opcodes byte-for-byte stable forever.
+        assert PROTOCOL_VERSION == "1.1.0"
 
     def test_frame_header_is_AA(self):
         assert FRAME_HEADER == 0xAA
@@ -53,6 +60,8 @@ class TestCommandTypeCodes:
         assert int(CommandType.MOUSE_MOVE) == 0x10
         assert int(CommandType.MOUSE_CLICK) == 0x11
         assert int(CommandType.MOUSE_SCROLL) == 0x12
+        assert int(CommandType.MOUSE_BUTTON_DOWN) == 0x13   # v1.1
+        assert int(CommandType.MOUSE_BUTTON_UP) == 0x14     # v1.1
         assert int(CommandType.KEY_PRESS) == 0x20
         assert int(CommandType.KEY_RELEASE) == 0x21
         assert int(CommandType.KEY_TYPE_STRING) == 0x22
@@ -124,6 +133,34 @@ class TestRoundtrip:
         assert decoded.seq_id == 3
         assert decoded.payload[0] == 0x04  # keycode first
         assert decoded.payload[1] == int(ModifierKey.SHIFT)
+
+    def test_mouse_button_down_v11(self):
+        """v1.1: MOUSE_BUTTON_DOWN payload is single byte [button:u8]."""
+        from clawtouch_hid_protocol import build_mouse_button_down
+        wire = build_mouse_button_down(MouseButton.LEFT, seq_id=42).serialize()
+        decoded = HidCommand.deserialize(wire)
+        assert decoded.cmd_type == CommandType.MOUSE_BUTTON_DOWN
+        assert decoded.seq_id == 42
+        assert decoded.payload == bytes([int(MouseButton.LEFT)])
+
+    def test_mouse_button_up_v11(self):
+        """v1.1: MOUSE_BUTTON_UP payload is single byte [button:u8]."""
+        from clawtouch_hid_protocol import build_mouse_button_up
+        wire = build_mouse_button_up(MouseButton.RIGHT, seq_id=43).serialize()
+        decoded = HidCommand.deserialize(wire)
+        assert decoded.cmd_type == CommandType.MOUSE_BUTTON_UP
+        assert decoded.seq_id == 43
+        assert decoded.payload == bytes([int(MouseButton.RIGHT)])
+
+    def test_mouse_button_opcodes_locked_at_13_14(self):
+        """Lock v1.1 opcodes — any renumber breaks firmware and HID/protocol
+        sync. cross-repo check_protocol_sync.py also asserts these values."""
+        from clawtouch_hid_protocol import build_mouse_button_down, build_mouse_button_up
+        down = build_mouse_button_down(MouseButton.LEFT).serialize()
+        up = build_mouse_button_up(MouseButton.LEFT).serialize()
+        # Byte 3 of a frame is the cmd type (after header + seq u16)
+        assert down[3] == 0x13
+        assert up[3] == 0x14
 
 
 class TestErrors:

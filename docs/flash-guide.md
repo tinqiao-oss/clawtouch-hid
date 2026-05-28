@@ -3,7 +3,9 @@
 # Flashing the ClawTouch HID Firmware
 
 > Last verified: 2026-03-14 — CircuitPython 10.1.4 + firmware v1.0.0
-> on a Raspberry Pi Pico 2.
+> on a Raspberry Pi Pico 2. The same procedure flashes firmware v1.1+
+> (v1.1 added the `MOUSE_BUTTON_DOWN/UP` opcodes — no boot.py or
+> bootloader changes, so the flash path is identical).
 
 ## What you need
 

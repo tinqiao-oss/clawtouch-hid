@@ -1,8 +1,15 @@
-"""ClawTouch HID firmware v1.0.2 — Raspberry Pi Pico 2.
+"""ClawTouch HID firmware v1.1.0 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data
 channel and executes the corresponding HID action. The firmware does
 nothing on its own — all decisions live on the host.
+
+v1.1.0 (2026-05-28): implements two new opcodes from protocol v1.1 —
+``MOUSE_BUTTON_DOWN`` (0x13) and ``MOUSE_BUTTON_UP`` (0x14). These
+let a host program compose drag gestures (press → multiple moves →
+release) and match the Anthropic Computer Use action set's
+``left_mouse_down`` / ``left_mouse_up``. v1.0 opcodes are byte-for-byte
+unchanged — old hosts keep working.
 
 v1.0.2 (2026-05-26, round 5 audit): main loop frame-sync uses
 ``bytearray.find`` + ``del buf[:idx]`` instead of repeated ``buf.pop(0)``.
@@ -46,7 +53,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.0.2"
+FIRMWARE_VERSION = "1.1.0"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
@@ -56,6 +63,8 @@ CMD_PONG = 0x02
 CMD_MOUSE_MOVE = 0x10
 CMD_MOUSE_CLICK = 0x11
 CMD_MOUSE_SCROLL = 0x12
+CMD_MOUSE_BUTTON_DOWN = 0x13    # v1.1
+CMD_MOUSE_BUTTON_UP = 0x14      # v1.1
 CMD_KEY_PRESS = 0x20
 CMD_KEY_RELEASE = 0x21
 CMD_KEY_TYPE = 0x22         # wire name: KEY_TYPE_STRING
@@ -99,6 +108,8 @@ class HidExecutor:
             CMD_MOUSE_MOVE: self._handle_mouse_move,
             CMD_MOUSE_CLICK: self._handle_mouse_click,
             CMD_MOUSE_SCROLL: self._handle_mouse_scroll,
+            CMD_MOUSE_BUTTON_DOWN: self._handle_mouse_button_down,   # v1.1
+            CMD_MOUSE_BUTTON_UP: self._handle_mouse_button_up,       # v1.1
             CMD_KEY_PRESS: self._handle_key_press,
             CMD_KEY_RELEASE: self._handle_key_release,
             CMD_KEY_TYPE: self._handle_key_type,
@@ -195,6 +206,32 @@ class HidExecutor:
             return
         delta = struct.unpack("<h", payload[:2])[0]
         self.mouse.move(wheel=delta)
+        self._send_ack(seq_id)
+
+    def _handle_mouse_button_down(self, seq_id, payload):
+        """v1.1: press a mouse button and do NOT release it. Pair with
+        MOUSE_BUTTON_UP (and MOUSE_MOVE frames in between) for drag."""
+        if len(payload) < 1:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "DOWN:1B")
+            return
+        button = MOUSE_BUTTON_MAP.get(payload[0])
+        if button is None:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "btn")
+            return
+        self.mouse.press(button)
+        self._send_ack(seq_id)
+
+    def _handle_mouse_button_up(self, seq_id, payload):
+        """v1.1: release a previously-pressed mouse button. Idempotent
+        (releasing a non-held button is a no-op, no error)."""
+        if len(payload) < 1:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "UP:1B")
+            return
+        button = MOUSE_BUTTON_MAP.get(payload[0])
+        if button is None:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "btn")
+            return
+        self.mouse.release(button)
         self._send_ack(seq_id)
 
     def _handle_key_press(self, seq_id, payload):

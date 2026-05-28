@@ -1,9 +1,11 @@
 [English](protocol-v1.md) | **简体中文**
 
-# ClawTouch HID 通信协议 v1.0(冻结版)
+# ClawTouch HID 通信协议 v1.1
 
-> **状态:** v1.0 — 已冻结
-> **冻结日期:** 2026-03-15
+> **状态:** v1.1 — 在 v1.0 冻结基线上**累加**
+> **v1.0 冻结日期:** 2026-03-15(已冻结的指令永远字节级稳定)
+> **v1.1 新增:** 2026-05-28(`MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` 独立按下/松开
+> 鼠标按键,用于拖拽手势 + 兼容 Anthropic Computer Use)
 > **适用范围:** 宿主(PC)↔ ClawTouch HID 设备(Raspberry Pi Pico 2)
 
 ---
@@ -77,11 +79,13 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 
 ### 3.2 鼠标命令
 
-| 命令          | 代码   | Payload                              | 说明 |
-|---------------|--------|--------------------------------------|------|
-| MOUSE_MOVE    | `0x10` | `[x:int16 LE] [y:int16 LE] [flags:uint8]` | 移动 |
-| MOUSE_CLICK   | `0x11` | `[button:uint8] [flags:uint8]`       | 点击 |
-| MOUSE_SCROLL  | `0x12` | `[delta:int16 LE]`                   | 滚轮 |
+| 命令               | 代码   | Payload                              | 起始版本 | 说明 |
+|--------------------|--------|--------------------------------------|---------|------|
+| MOUSE_MOVE         | `0x10` | `[x:int16 LE] [y:int16 LE] [flags:uint8]` | v1.0 | 移动 |
+| MOUSE_CLICK        | `0x11` | `[button:uint8] [flags:uint8]`       | v1.0 | 按下+松开(原子) |
+| MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | 滚轮 |
+| MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | 按下不松(拖拽起点) |
+| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | 松开(拖拽终点/紧急停) |
 
 **MOUSE_MOVE flags:**
 
@@ -99,6 +103,19 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 **MOUSE_CLICK flags:**
 
 - bit0 = 1: 双击 (固件背靠背发两个 `mouse.click` 报告)
+
+**MOUSE_BUTTON_DOWN / MOUSE_BUTTON_UP (v1.1):**
+
+- 1 字节 payload: 按键代码 (跟 `MOUSE_CLICK` 同样的编码).
+- `BUTTON_DOWN` 按下按键但**不**松开. 之后的 `MOUSE_MOVE` 帧会产生
+  "按住拖拽"效果.
+- `BUTTON_UP` 释放指定的按键. 对未按下的按键调用 `BUTTON_UP` 是 no-op
+  (幂等, 不报错).
+- 一次完整 drag = `BUTTON_DOWN(left)` → 若干 `MOUSE_MOVE` → `BUTTON_UP(left)`.
+  `clawtouch-mcp` 把这个组合封装成 `hid.drag` 单个工具; 线协议层故意保持
+  最小原语.
+- `KEY_RELEASE(0, 0)` (release-all) 也会松开持有的鼠标按键 —— 紧急停止
+  语义与 v1.0 保持不变.
 
 ### 3.3 键盘命令
 

@@ -3,7 +3,9 @@
 # ClawTouch HID 固件烧录指南
 
 > 最后验证: 2026-03-14 — CircuitPython 10.1.4 + 固件 v1.0.0 在
-> Raspberry Pi Pico 2 上跑通
+> Raspberry Pi Pico 2 上跑通. 同一流程也适用于 v1.1+ (v1.1 加了
+> `MOUSE_BUTTON_DOWN/UP` 两个 opcode, 没动 boot.py 或 bootloader,
+> 烧录步骤完全一样)
 
 ## 你需要
 

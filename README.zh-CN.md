@@ -189,7 +189,7 @@ $ python
 <CommandType.ACK: 0x40>              # Pico 已把 'Hello' 作为 HID 报告打出 ✓
 ```
 
-完整的帧格式和 13 个命令码见
+完整的帧格式和 15 个命令码见
 [docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md); 可运行的
 冒烟示例在 [`examples/ping_test.py`](examples/ping_test.py)。
 

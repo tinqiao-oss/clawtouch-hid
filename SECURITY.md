@@ -21,8 +21,11 @@ host process** (e.g. `clawtouch-mcp`).
 ## Supported versions
 
 Only the **latest 1.x firmware + 1.x protocol module** receive
-security fixes. Wire protocol v1.0 is frozen — fixes ship as new
-firmware patches without renumbering the protocol.
+security fixes. The wire protocol v1.0 baseline is frozen
+(2026-03-15) — any subsequent revisions (v1.1 added drag opcodes
+2026-05-28, future v1.2+ will follow the same pattern) only add new
+opcodes inside the existing frame envelope. v1.0 opcodes never get
+renumbered; old hosts keep working against newer firmware.
 
 ## How to report
 

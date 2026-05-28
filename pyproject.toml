@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clawtouch-hid-protocol"
-version = "1.0.0"
-description = "Python definitions for the ClawTouch HID v1.0 wire protocol (USB CDC frames spoken by ClawTouch Pico firmware)."
+version = "1.1.0"
+description = "Python definitions for the ClawTouch HID v1.1 wire protocol (additive over v1.0 frozen baseline) — USB CDC frames spoken by ClawTouch Pico firmware. Includes the v1.1 MOUSE_BUTTON_DOWN/UP opcodes for drag gestures."
 readme = "README.md"
 # PEP 639: SPDX expression form (setuptools >= 77). Avoid the deprecated
 # `license = { text = "MIT" }` table form and the legacy
