@@ -24,8 +24,8 @@ product-mark + technical-version identifier.
 
 **The MIT License grants full rights to use, modify, and redistribute
 the source code, including for commercial purposes — and the MIT grant
-specifically permits anyone to implement the frozen v1.0 wire protocol
-in their own firmware.** The marks above are governed *separately* by
+specifically permits anyone to implement the v1.1 wire protocol (v1.0
+baseline frozen 2026-03-15, v1.1 additive) in their own firmware.** The marks above are governed *separately* by
 trademark law and are **not** covered by the MIT grant. The two are
 independent: nothing in this trademark notice restricts code-level
 rights granted by MIT, and nothing in MIT grants trademark rights. In
@@ -127,8 +127,8 @@ Co., Ltd.) 所有, **未经书面许可不得用于暗示赞助、推荐或关�
 `ClawTouch HID v1.0` 是产品商标 + 技术版本标识的组合。
 
 **MIT 协议授予对源代码的完整权利, 包括商业用途的使用、修改和再
-分发 —— MIT 协议明确许可任何人在自己的固件中实现冻结版 v1.0
-线协议。** 上述商标受商标法**单独**规约, **不在** MIT 授权范围。
+分发 —— MIT 协议明确许可任何人在自己的固件中实现 v1.1 线协议 (v1.0
+baseline 2026-03-15 冻结, v1.1 累加)。** 上述商标受商标法**单独**规约, **不在** MIT 授权范围。
 两者相互独立: 本商标声明不限制 MIT 协议授予的代码层权利, MIT
 协议也不授予任何商标权利。因此实务上, 商业固件分发必须:
 

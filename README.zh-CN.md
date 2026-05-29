@@ -3,15 +3,16 @@
 # clawtouch-hid
 
 > **ClawTouch 的开源硬件层。**
-> Raspberry Pi Pico 2 上的 CircuitPython 固件、它说的冻结版 USB-CDC 通信协议,
-> 以及给宿主端直接驱动这块板子用的 Python 协议模块。
+> Raspberry Pi Pico 2 上的 CircuitPython 固件、它说的 v1.1 USB-CDC 通信协议
+> (v1.0 baseline 字节级冻结, v1.1 累加 drag opcode), 以及给宿主端直接驱动
+> 这块板子用的 Python 协议模块。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Protocol: v1.0 (frozen)](https://img.shields.io/badge/protocol-v1.0_frozen-blue.svg)](docs/protocol-v1.zh-CN.md)
+[![Protocol: v1.1](https://img.shields.io/badge/protocol-v1.1-blue.svg)](docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 线协议帧格式: 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
+  <img src="docs/assets/hero.svg" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 baseline 线协议帧格式 (v1.1 累加新 opcode 但不改帧结构): 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
 </p>
 
 ---
@@ -27,10 +28,11 @@ HID 设备"—— 一台 USB 接入的键鼠,可以让另一台 PC 上跑的程�
    固件**自己不做任何决策** —— 它等 CDC data 端口收到带帧的命令,然后把
    每条命令翻译成一个 HID 报告。
 2. **`clawtouch_hid_protocol/`** —— 一个小巧、零依赖的 Python 模块,
-   定义了冻结版 v1.0 通信协议(命令码、payload 格式、构帧 helper)。
-   如果你想跳过 MCP 直接驱动板子,从这个模块开始。
-3. **`docs/`** —— [冻结版 v1.0 协议规范](docs/protocol-v1.zh-CN.md) 和
-   [烧录指南](docs/flash-guide.zh-CN.md)。
+   定义了 v1.1 通信协议(命令码、payload 格式、构帧 helper; v1.0 baseline
+   2026-03-15 冻结, v1.1 累加)。如果你想跳过 MCP 直接驱动板子,
+   从这个模块开始。
+3. **`docs/`** —— [v1.1 协议规范](docs/protocol-v1.zh-CN.md) (v1.0 baseline
+   冻结, v1.1 累加) 和 [烧录指南](docs/flash-guide.zh-CN.md)。
 
 这块板子也是 [clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)
 MCP server 跟它对话的硬件。如果你只想"让 Claude Desktop 控制真实键鼠",
@@ -101,7 +103,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 |------|------|
 | 主控 | RP2350 (Raspberry Pi Pico 2 参考板) |
 | 固件框架 | CircuitPython 10.x |
-| 协议版本 | v1.0 (2026-03-15 冻结) |
+| 协议版本 | v1.1 (v1.0 baseline 2026-03-15 冻结) |
 | USB 接口 | HID (键盘 + 鼠标) + CDC (console + data) |
 | CDC 波特率 | 115200 (data 通道) |
 
@@ -157,7 +159,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 
 一段真实的 Python REPL 会话, 只用 `clawtouch-hid-protocol` (本仓库
 的宿主端模块) + `pyserial`, 通过 USB-CDC 跟真实 Pico 2 对话。每个
-字节都是冻结版 v1.0 帧; 任何刷了本仓库固件的 Pico 2 都能这么跑:
+字节都是 v1.0 baseline 帧 (帧结构在 v1.1 不变); 任何刷了本仓库固件的 Pico 2 都能这么跑:
 
 ```text
 $ python
@@ -216,8 +218,9 @@ clawtouch-hid/
 * **固件不含业务逻辑。** 只做"把带帧字节翻译成 HID 报告"。一切决策 ——
   打什么字、什么时候点击、多步操作怎么编排 —— 都在宿主侧。这让固件
   小、可审、可被不同宿主栈复用。
-* **协议是冻结的。** v1.0 在 2026-03-15 发布后不再改。未来新能力以新
-  命令码的形式加进同一个信封,既有的 v1.0 命令永远兼容。
+* **协议是累加的。** v1.0 baseline 在 2026-03-15 发布后字节级冻结永不更改;
+  v1.1 (2026-05-28) 累加了 drag opcode, 没改 v1.0 任何字节。未来新能力
+  以新命令码的形式继续加进同一个信封,既有的 v1.0 命令永远兼容。
 * **以值为准,不以名为准。** 固件、`clawtouch_hid_protocol` 模块、协议
   spec 三处各列了一份命令码。数值是真理,Python 名称只是为了可读。
 
@@ -256,7 +259,7 @@ ClawTouch 不是第一个在 AI agent 和目标机之间塞 HID 硬件的项目�
   **[`sunasaji/mcp-serial-hid-kvm`](https://github.com/sunasaji/mcp-serial-hid-kvm)** ——
   用 CH9329 / CH9350L 现成 USB-HID ASIC + 视频采集卡, 上层带可选 MCP server。
   **架构上最直接的同类项目**。用固化功能芯片 (固件不可自定义); ClawTouch
-  改用 Pico 2 + CircuitPython, 走冻结 v1.0 线协议, 新增 opcode 对老宿主
+  改用 Pico 2 + CircuitPython, 走 v1.1 线协议 (v1.0 baseline 冻结, v1.1 累加), 新增 opcode 对老宿主
   向前兼容, 固件本身可审计可改。
 * **[HIDAgent](https://arxiv.org/abs/2602.00492)** —— CMU 的 Bigham 等人,
   2026-01 发布。< $30 的 Raspberry Pi Pico + CircuitPython 研究 toolkit,
@@ -293,7 +296,7 @@ CircuitPython 上,因为它在 import 时就依赖板上的 `usb_hid` / `usb_cdc
 
 ## 参与贡献
 
-欢迎 PR:文档修订、新示例、针对 v1.0 协议的新语言绑定、英文翻译、
+欢迎 PR:文档修订、新示例、针对 v1.1 协议的新语言绑定 (v1.0 baseline 仍可用)、英文翻译、
 硬件兼容性报告。
 
 **不接受**的 PR:agent 循环逻辑或应用层功能(故意排除在范围外 ——

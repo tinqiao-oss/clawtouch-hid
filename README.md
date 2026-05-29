@@ -8,12 +8,12 @@
 > drive the board directly.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Protocol: v1.0 (frozen)](https://img.shields.io/badge/protocol-v1.0_frozen-blue.svg)](docs/protocol-v1.md)
+[![Protocol: v1.1](https://img.shields.io/badge/protocol-v1.1-blue.svg)](docs/protocol-v1.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 wire frame layout is shown on the right: 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
+  <img src="docs/assets/hero.svg" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 baseline wire frame layout is shown on the right (v1.1 adds new opcodes without changing the frame structure): 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
 </p>
 
 ---
@@ -30,12 +30,13 @@ external program (running on your PC) can drive over a serial command channel:
    **nothing on its own** — it waits for framed commands on the CDC data port
    and translates each one into a HID report.
 2. **`clawtouch_hid_protocol/`** — a small, dependency-free Python module
-   that defines the frozen v1.0 wire protocol (command codes, payload
-   layouts, frame helpers). Use it from your own host program if you want
-   to talk to the board directly without going through MCP or any other
-   layer.
-3. **`docs/`** — the [frozen v1.0 protocol specification](docs/protocol-v1.md)
-   and a step-by-step [flash guide](docs/flash-guide.md).
+   that defines the v1.1 wire protocol (command codes, payload layouts,
+   frame helpers; v1.0 baseline frozen 2026-03-15, v1.1 additive). Use it
+   from your own host program if you want to talk to the board directly
+   without going through MCP or any other layer.
+3. **`docs/`** — the [v1.1 protocol specification](docs/protocol-v1.md)
+   (v1.0 baseline frozen, v1.1 additive) and a step-by-step
+   [flash guide](docs/flash-guide.md).
 
 The board is also the hardware that the [clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)
 MCP server talks to. If all you want is "let Claude Desktop drive a real
@@ -125,7 +126,7 @@ not to the firmware itself.
 |------|------|
 | Microcontroller | RP2350 (Raspberry Pi Pico 2 reference board) |
 | Firmware framework | CircuitPython 10.x |
-| Protocol version | v1.0 (frozen 2026-03-15) |
+| Protocol version | v1.1 (v1.0 baseline frozen 2026-03-15) |
 | USB interfaces | HID (keyboard + mouse) + CDC (console + data) |
 | CDC baud rate | 115200 (data channel) |
 
@@ -184,9 +185,9 @@ Fifteen command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL/BUTTON_
 
 A real session from a Python REPL, using nothing but
 `clawtouch-hid-protocol` (this repo's host-side module) and `pyserial`,
-talking to a real Pico 2 over USB-CDC. Every byte is a frozen-v1.0
-frame; you can run this against any Pico 2 flashed with the firmware
-in this repo:
+talking to a real Pico 2 over USB-CDC. Every byte is a v1.0 baseline
+frame (frame structure unchanged in v1.1); you can run this against
+any Pico 2 flashed with the firmware in this repo:
 
 ```text
 $ python
@@ -251,9 +252,11 @@ clawtouch-hid/
   HID reports. All decisions — what to type, when to click, how to pace
   multi-step actions — live on the host. This keeps the firmware tiny,
   auditable, and reusable across different host stacks.
-* **The protocol is frozen.** v1.0 was published 2026-03-15 and is not
-  changing. Future capabilities will arrive as new command codes inside
-  the same envelope. Existing v1.0 commands keep working forever.
+* **The protocol is additive.** v1.0 baseline was published 2026-03-15
+  and is byte-level frozen forever; v1.1 (2026-05-28) added drag opcodes
+  without changing v1.0. New capabilities continue to arrive as new
+  command codes inside the same envelope. Existing v1.0 commands keep
+  working forever.
 * **Protocol-by-value, not protocol-by-name.** The firmware, the
   `clawtouch_hid_protocol` module, and the protocol spec each list the
   command codes independently. The numbers are the source of truth; the
@@ -298,9 +301,9 @@ agent and a target PC. The closest neighbors:
   CH9329 / CH9350L USB-HID ASICs plus a video-capture card, with an
   optional MCP server on top. The closest direct peer in architecture.
   Uses fixed-function chips (firmware not user-modifiable); ClawTouch
-  instead pairs a Pico 2 with CircuitPython behind a frozen-v1.0 wire
-  protocol, so new opcodes are additive across hosts and the firmware
-  stays auditable.
+  instead pairs a Pico 2 with CircuitPython behind a v1.1 wire protocol
+  (v1.0 baseline frozen, v1.1 additive), so new opcodes are additive
+  across hosts and the firmware stays auditable.
 * **[HIDAgent](https://arxiv.org/abs/2602.00492)** — Bigham et al.
   (CMU, 2026-01). A < $30 Raspberry Pi Pico + CircuitPython research
   toolkit for UI agents driving HID-compatible devices. The closest
@@ -344,7 +347,8 @@ hardware; contact `support@tinqiao.com` for details.
 ## Contributing
 
 PRs are welcome for: documentation fixes, additional examples, new client
-language bindings against the v1.0 protocol, English translations,
+language bindings against the v1.1 protocol (v1.0 baseline still works),
+English translations,
 hardware compatibility reports.
 
 We're _not_ taking PRs for: agent-loop logic or application-level
