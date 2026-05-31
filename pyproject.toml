@@ -32,7 +32,8 @@ classifiers = [
 Homepage = "https://clawtouch.cn"
 Source = "https://github.com/tinqiao-oss/clawtouch-hid"
 Issues = "https://github.com/tinqiao-oss/clawtouch-hid/issues"
+Changelog = "https://github.com/tinqiao-oss/clawtouch-hid/blob/master/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["clawtouch_hid_protocol*"]
-exclude = ["firmware*", "examples*", "docs*"]
+exclude = ["firmware*", "examples*", "docs*", "tests*"]

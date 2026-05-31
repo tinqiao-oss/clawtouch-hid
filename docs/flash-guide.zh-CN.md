@@ -2,10 +2,10 @@
 
 # ClawTouch HID 固件烧录指南
 
-> 最后验证: 2026-03-14 — CircuitPython 10.1.4 + 固件 v1.0.0 在
-> Raspberry Pi Pico 2 上跑通. 同一流程也适用于 v1.1+ (v1.1 加了
-> `MOUSE_BUTTON_DOWN/UP` 两个 opcode, 没动 boot.py 或 bootloader,
-> 烧录步骤完全一样)
+> 最后验证: 2026-03-14 — 在 CircuitPython 10.1.4 + Raspberry Pi Pico 2
+> 上验证了**烧录流程**。同一流程适用于本仓库直到 v1.1.2 的所有固件:
+> v1.1.0 的 drag opcode、v1.1.1 的键盘字节序统一、v1.1.2 的紧急停修复
+> 都只改 `code.py`, 没动 boot.py 或 bootloader, 烧录步骤完全一样。
 
 ## 你需要
 
@@ -31,6 +31,10 @@
 
 本仓库的 `firmware/lib/adafruit_hid/` 是已验证的副本。复制到 Pico 的
 `lib/` 即可。
+
+> 内置 `.mpy` 是 CircuitPython `mpy` 格式 v6 (ABI 6), CircuitPython 10.x
+> 可直接加载 —— `.mpy` 格式在整个 10.x 系列未变。若开机报
+> `incompatible .mpy file`, 改用方案 B 下载匹配的 10.x Bundle。
 
 **方案 B — 自己从 Adafruit 拉新版:**
 

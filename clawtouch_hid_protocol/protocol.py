@@ -180,7 +180,14 @@ def build_mouse_button_up(button: MouseButton, *, seq_id: int = 0) -> HidCommand
 def build_key_press(keycode: int, modifiers: int = 0, *, seq_id: int = 0) -> HidCommand:
     """KEY_PRESS payload is ``[modifiers, keycode]`` (unified v1.1.1 — same
     as :func:`build_key_release` and :func:`build_key_combo`; matches the
-    USB HID keyboard report layout where the modifier byte comes first)."""
+    USB HID keyboard report layout where the modifier byte comes first).
+
+    .. warning::
+       The *positional* parameter order is ``(keycode, modifiers)`` — the
+       **opposite** of :func:`build_key_combo`'s ``(modifiers, keycode)``.
+       The wire payload is identical either way, but a positional call
+       written by analogy to ``build_key_combo`` would silently swap the
+       two values. Prefer keyword arguments (``keycode=``, ``modifiers=``)."""
     payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_PRESS, payload, seq_id)
 
@@ -190,14 +197,22 @@ def build_key_release(keycode: int = 0, modifiers: int = 0, *, seq_id: int = 0) 
     as :func:`build_key_press` and :func:`build_key_combo` (unified v1.1.1).
     Both arguments zero (the default) is panic-stop semantics: firmware
     releases every held key and mouse button. Pass explicit
-    keycode/modifiers to release a specific key."""
+    keycode/modifiers to release a specific key.
+
+    Like :func:`build_key_press`, the *positional* order is
+    ``(keycode, modifiers)`` — opposite of :func:`build_key_combo`. Prefer
+    keyword arguments."""
     payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_RELEASE, payload, seq_id)
 
 
 def build_key_combo(modifiers: int, keycode: int, *, seq_id: int = 0) -> HidCommand:
     """KEY_COMBO payload is ``[modifiers, keycode]`` — same byte order as
-    :func:`build_key_press` and :func:`build_key_release` (unified v1.1.1)."""
+    :func:`build_key_press` and :func:`build_key_release` (unified v1.1.1).
+
+    Note the *positional* order here is ``(modifiers, keycode)`` — the
+    reverse of :func:`build_key_press` / :func:`build_key_release`, whose
+    first positional argument is the keycode. Prefer keyword arguments."""
     payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_COMBO, payload, seq_id)
 

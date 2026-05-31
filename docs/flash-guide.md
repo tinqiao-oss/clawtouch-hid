@@ -2,10 +2,12 @@
 
 # Flashing the ClawTouch HID Firmware
 
-> Last verified: 2026-03-14 — CircuitPython 10.1.4 + firmware v1.0.0
-> on a Raspberry Pi Pico 2. The same procedure flashes firmware v1.1+
-> (v1.1 added the `MOUSE_BUTTON_DOWN/UP` opcodes — no boot.py or
-> bootloader changes, so the flash path is identical).
+> Last verified: 2026-03-14 — flash *procedure* on CircuitPython 10.1.4
+> + a Raspberry Pi Pico 2. The same procedure flashes every firmware in
+> this repo through v1.1.2: the v1.1.0 drag opcodes, the v1.1.1 keyboard
+> byte-order unification, and the v1.1.2 panic-stop fix are all
+> `code.py`-only changes — no `boot.py` or bootloader change — so the
+> flash path is identical.
 
 ## What you need
 
@@ -35,6 +37,11 @@ keyboard / mouse classes. You have two options:
 
 This repository ships a known-good copy under
 `firmware/lib/adafruit_hid/`. Copy it to the Pico's `lib/` folder.
+
+> The bundled `.mpy` files are CircuitPython `mpy` format v6 (ABI 6),
+> which CircuitPython 10.x loads as-is — the `.mpy` format did not change
+> across the 10.x series. If you ever see an `incompatible .mpy file`
+> error at boot, use Option B to fetch the matching 10.x bundle.
 
 **Option B — fetch a fresh copy from Adafruit:**
 

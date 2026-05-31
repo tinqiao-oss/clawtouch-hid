@@ -136,6 +136,20 @@ class TestRoundtrip:
         assert decoded.payload[0] == int(ModifierKey.SHIFT)  # modifiers first
         assert decoded.payload[1] == 0x04  # keycode
 
+    def test_three_keyboard_builders_agree_on_payload(self):
+        """build_key_press / build_key_release / build_key_combo must all
+        emit the same ``[modifiers, keycode]`` payload for the same logical
+        (modifiers, keycode) — despite press/release taking positional
+        (keycode, modifiers) and combo taking (modifiers, keycode). Locks
+        the signature footgun: "fixing" one builder's arg order without the
+        others would diverge the wire output and fail here."""
+        mods = int(ModifierKey.CTRL) | int(ModifierKey.SHIFT)
+        kc = 0x04  # 'a'
+        press = build_key_press(kc, mods).payload
+        release = build_key_release(kc, mods).payload
+        combo = build_key_combo(mods, kc).payload
+        assert press == release == combo == bytes([mods, kc])
+
     def test_mouse_button_down_v11(self):
         """v1.1: MOUSE_BUTTON_DOWN payload is single byte [button:u8]."""
         from clawtouch_hid_protocol import build_mouse_button_down

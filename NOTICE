@@ -16,6 +16,13 @@ firmware/lib/adafruit_hid/
     SPDX-License-Identifier: MIT
     Upstream:  https://github.com/adafruit/Adafruit_CircuitPython_HID
 
+    Note: this bundled library lives under `firmware/`, which travels with
+    the GitHub source tree only. The PyPI sdist/wheel for
+    `clawtouch-hid-protocol` excludes `firmware/` (see MANIFEST.in and
+    pyproject `[tool.setuptools.packages.find]`), so this attribution and
+    the `firmware/lib/adafruit_hid/LICENSE` reference apply to source-tree
+    redistributions, not to the PyPI package.
+
     Bundled on or about 2026-03-20 from the Adafruit CircuitPython
     library bundle (https://circuitpython.org/libraries) — the bundle
     is updated daily and tracks upstream `main`, not the per-library

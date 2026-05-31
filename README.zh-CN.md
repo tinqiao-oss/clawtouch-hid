@@ -8,8 +8,9 @@
 > 这块板子用的 Python 协议模块。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Protocol: v1.1](https://img.shields.io/badge/protocol-v1.1-blue.svg)](docs/protocol-v1.zh-CN.md)
+[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
+[![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
 <p align="center">
   <img src="docs/assets/hero.svg" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 baseline 线协议帧格式 (v1.1 累加新 opcode 但不改帧结构): 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
@@ -97,6 +98,22 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 办法》2025-09-01 施行) 由驱动本固件的上层 agent 承担, 不由本
 固件承担。
 
+## 自主与安全
+
+本固件是一个通用 HID 执行器: 它忠实地把宿主发来的任何帧翻译成 HID
+报告, 没有任何板载护栏, 也不检查意图。本 README 作为卖点的那些特性
+—— 操作系统把输入当成物理键鼠、"一切决策都在宿主侧" —— 有一个对称的
+后果: 一个自主 agent 驱动这块板子, 实际上拥有与坐在键盘前的真人**同等
+的**目标机操控范围; 而这可能在用户本意之外发生 —— 经由提示词注入、
+模型错误, 或过宽的自主授权。
+
+这是 **agent 行为 / 部署层面**的风险, 不是固件 bug (见
+[SECURITY.md](SECURITY.md))。完整的风险披露与运维缓解措施 (专用 /
+最小权限宿主、人在回路、网络隔离、紧急停 panic stop、把屏幕内容当作
+不可信输入), 见
+[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md)
+的「自主性与安全」一节。
+
 ## 硬件
 
 | 项 | 规格 |
@@ -150,7 +167,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 * `csum` = 前面所有字节累加和 & 0xFF
 * payload 最大 1024 字节
 
-定义了 12 个命令码:`PING/PONG`、`MOUSE_MOVE/CLICK/SCROLL`、
+定义了 15 个命令码:`PING/PONG`、`MOUSE_MOVE/CLICK/SCROLL/BUTTON_DOWN/BUTTON_UP`、
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`、`STATUS_REQUEST/RESPONSE`,
 外加 `ACK` 和 `ERROR`。完整字节级布局见
 [docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md)。
@@ -165,7 +182,8 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 $ python
 >>> import serial
 >>> from clawtouch_hid_protocol import (
-...     build_ping, build_mouse_click, build_key_type_string, HidCommand
+...     build_ping, build_mouse_move, build_mouse_click,
+...     build_type_string, HidCommand, MouseButton,
 ... )
 >>> ser = serial.Serial("COM7", 115200, timeout=2)   # CDC data 端口
 
@@ -178,17 +196,20 @@ $ python
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
 <CommandType.PONG: 0x02>             # Pico 已响应 ✓
 
-# ── 在 (640, 360) 左键点击 —— 宿主上真实鼠标在动 ─────────────────
->>> ser.write(build_mouse_click(
-...     seq_id=2, button=1, x=640, y=360
-... ).serialize())
+# ── 光标右移 100px、下移 50px, 然后左键点击 ───────────────────────
+# v1.0 固件始终把 (x, y) 当作**相对**位移 —— USB Boot Mouse 没有绝对
+# 坐标报告。要点击某个具体屏幕像素, 宿主需先查 OS 光标位置再发 delta。
+>>> ser.write(build_mouse_move(100, 50, relative=True, seq_id=2).serialize())
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
-<CommandType.ACK: 0x40>              # Pico 已确认 ✓
+<CommandType.ACK: 0xFE>              # 光标已移动, Pico 已确认 ✓
+>>> ser.write(build_mouse_click(MouseButton.LEFT, seq_id=3).serialize())
+>>> HidCommand.deserialize(ser.read(7)).cmd_type
+<CommandType.ACK: 0xFE>              # Pico 已点击 ✓
 
 # ── 输入字符串 —— 宿主当前焦点应用真实出字 ────────────────────────
->>> ser.write(build_key_type_string(seq_id=3, text="Hello").serialize())
+>>> ser.write(build_type_string("Hello", seq_id=4).serialize())
 >>> HidCommand.deserialize(ser.read(7)).cmd_type
-<CommandType.ACK: 0x40>              # Pico 已把 'Hello' 作为 HID 报告打出 ✓
+<CommandType.ACK: 0xFE>              # Pico 已把 'Hello' 作为 HID 报告打出 ✓
 ```
 
 完整的帧格式和 15 个命令码见

@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing — please read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)
+        Before filing — please read [CONTRIBUTING.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/CONTRIBUTING.md)
         for the scope. **Breaking changes to wire protocol v1.0 will be
         closed without review.** New capabilities arrive as new opcodes
         inside the same envelope, never as edits to existing opcodes.

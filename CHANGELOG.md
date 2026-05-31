@@ -9,6 +9,46 @@ edits to existing ones. The `clawtouch-hid-protocol` Python package
 tracks the protocol version; the firmware version is tagged
 separately on each release.
 
+## [Unreleased] — docs & packaging hygiene (pre-publish sweep)
+
+### Fixed — documentation
+
+- zh-CN README "实际效果" REPL example now runs as written: was calling
+  the non-existent `build_key_type_string`, passing `x=/y=` to
+  `build_mouse_click`, and printing `ACK` as `0x40` instead of `0xFE`. It
+  now mirrors the English example (`build_mouse_move` then
+  `build_mouse_click(MouseButton.LEFT)`, `build_type_string`).
+- Added the **「自主与安全」(Autonomy & safety)** section to the zh-CN
+  README so the Chinese primary doc carries the same 4th-category risk
+  disclosure as the English one.
+- Corrected the command-code count to **15** across both READMEs (was
+  variously 12 / 13) and listed the v1.1 drag opcodes in the zh list.
+- `STATUS_RESPONSE` example (`fw_ver`), flash-guide "last verified" stamp,
+  bug-report version placeholders, and the `MOUSE_BUTTON_UP` spec note now
+  reflect firmware 1.1.2 / protocol 1.1.1; `packet_parser.py` docstring
+  relabelled from "v1.0" to "epoch 1".
+- zh-CN README badges aligned with EN (wire-protocol epoch 1 + commercial);
+  feature-request issue template link and config contact link fixed
+  (`blob/master`, https).
+
+### Changed — packaging
+
+- sdist now ships `SECURITY.md` / `CHANGELOG.md` / `CONTRIBUTING.md` /
+  `README.zh-CN.md` (MANIFEST.in `include`); `tests/` also excluded from
+  the wheel via `packages.find`; added a `Changelog` project URL.
+
+### Changed — protocol module
+
+- `build_key_press` / `build_key_release` / `build_key_combo` docstrings
+  now warn that press/release take positional `(keycode, modifiers)` while
+  combo takes `(modifiers, keycode)` — prefer keyword arguments. Wire
+  output is unchanged. Added `test_three_keyboard_builders_agree_on_payload`
+  locking all three builders to the same payload (suite now 34 tests).
+
+- `examples/ping_test.py` matches Picos by Raspberry Pi VID only (the old
+  PID whitelist was a dead `or p.pid is not None` short-circuit);
+  `examples/drag_test.py` resyncs the input buffer after the drag glide.
+
 ## [1.1.2] — 2026-05-31 — Panic-stop releases mouse buttons (firmware fix)
 
 ### Fixed — firmware
@@ -31,7 +71,7 @@ Firmware only — **wire protocol unchanged (still v1.1)**,
 `hid_firmware_min` stays `1.0.0`. Old hosts unaffected; flashing
 firmware 1.1.2 is a recommended (non-breaking) upgrade.
 
-## [1.1.1] - 2026-05-29
+## [1.1.1] — 2026-05-31
 ### Changed (BREAKING vs <= 1.1.0)
 - Unified keyboard payload byte order to `[modifiers, keycode]`. KEY_PRESS (0x20) and KEY_RELEASE (0x21) previously used `[keycode, modifiers]`; they now match KEY_COMBO (0x23) and the USB HID keyboard report layout (modifier byte first). Breaking wire change for KEY_PRESS/KEY_RELEASE vs firmware <= 1.1.0 — flash firmware 1.1.1 in lockstep. Pre-publish correction; the protocol has not been publicly released.
 

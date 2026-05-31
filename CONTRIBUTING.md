@@ -52,7 +52,7 @@ python -m venv .venv
 .venv/bin/activate                              # or .venv\Scripts\activate on Windows
 pip install -e .
 pip install pytest
-pytest tests/ -q                                # 24 tests, ~0.1s
+pytest tests/ -q                                # 34 tests, ~0.1s
 ```
 
 For firmware changes you'll need an actual Pico 2 + CircuitPython

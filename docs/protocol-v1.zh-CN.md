@@ -70,8 +70,11 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 **STATUS_RESPONSE payload:**
 
 ```json
-{"fw_ver": "1.0.0", "board": "pico2", "uptime_ms": 12345}
+{"fw_ver": "1.1.2", "board": "pico2", "uptime_ms": 12345}
 ```
+
+`fw_ver` 是运行中固件的语义版本号 —— 此处数值仅为示例; 发
+`STATUS_REQUEST` 查实时值。
 
 **ERROR 错误码:**
 
@@ -91,7 +94,7 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 | MOUSE_CLICK        | `0x11` | `[button:uint8] [flags:uint8]`       | v1.0 | 按下+松开(原子) |
 | MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | 滚轮 |
 | MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | 按下不松(拖拽起点) |
-| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | 松开(拖拽终点/紧急停) |
+| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | 松开指定按钮(拖拽终点) |
 
 **MOUSE_MOVE flags:**
 

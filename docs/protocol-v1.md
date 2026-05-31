@@ -80,8 +80,11 @@ All multi-byte integers are little-endian.
 **STATUS_RESPONSE payload:**
 
 ```json
-{"fw_ver": "1.0.0", "board": "pico2", "uptime_ms": 12345}
+{"fw_ver": "1.1.2", "board": "pico2", "uptime_ms": 12345}
 ```
+
+`fw_ver` is the running firmware's semantic version — the value shown is
+illustrative; query `STATUS_REQUEST` for the live value.
 
 **ERROR codes:**
 
@@ -101,7 +104,7 @@ All multi-byte integers are little-endian.
 | MOUSE_CLICK        | `0x11` | `[button:uint8] [flags:uint8]`       | v1.0 | Press + release (atomic) |
 | MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | Wheel scroll |
 | MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | Press, no release (drag start) |
-| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | Release (drag end / panic stop) |
+| MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | Release named button (drag end) |
 
 **MOUSE_MOVE flags:**
 

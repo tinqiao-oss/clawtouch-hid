@@ -28,9 +28,11 @@ from clawtouch_hid_protocol import (
     build_ping,
 )
 
-# Raspberry Pi USB VID; the Pico 2 advertises one of these PIDs
+# Raspberry Pi USB VID. CircuitPython assigns the CDC PID dynamically
+# (commonly 0x0005 / 0x000A / 0x000C / 0x0010), so we match on VID alone
+# and let the highest-numbered CDC port within a serial group win. If
+# auto-detect guesses wrong, pass the port explicitly.
 _PICO_VID = 0x2E8A
-_PICO_PIDS = {0x0005, 0x000A, 0x000C, 0x0010}
 _PORT_NUM_RE = re.compile(r"(\d+)$")
 
 
@@ -56,7 +58,7 @@ def auto_detect_port() -> str | None:
     """
     pico_ports = [
         p for p in serial.tools.list_ports.comports()
-        if p.vid == _PICO_VID and (p.pid in _PICO_PIDS or p.pid is not None)
+        if p.vid == _PICO_VID
     ]
     if not pico_ports:
         return None

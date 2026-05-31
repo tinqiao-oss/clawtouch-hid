@@ -244,7 +244,7 @@ $ python
 <CommandType.ACK: 0xFE>              # Pico typed 'Hello' as HID reports ✓
 ```
 
-The full frame format and all 13 command opcodes are in
+The full frame format and all 15 command opcodes are in
 [docs/protocol-v1.md](docs/protocol-v1.md); a runnable smoke test
 lives in [`examples/ping_test.py`](examples/ping_test.py).
 

@@ -113,6 +113,11 @@ def run_drag(port: str) -> None:
             time.sleep(STEP_INTERVAL_S)
         print(f"  {'MOUSE_MOVE x' + str(STEPS):18s} sent ({STEPS} × {STEP_PX} px = {STEPS * STEP_PX} px)")
 
+        # The intermediate moves above drain only 7 bytes per ACK; if the
+        # firmware returned a longer ERROR frame for any of them the input
+        # buffer could be misaligned. Resync before the framed release.
+        ser.reset_input_buffer()
+
         # Step 3: release LEFT button.
         _send_and_expect_ack(
             ser,

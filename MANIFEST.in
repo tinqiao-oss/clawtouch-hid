@@ -10,6 +10,11 @@
 #   - tests/     : import firmware/ via sys.path, so they FAIL if shipped
 #                  in an sdist that (correctly) excludes firmware/. Keeping
 #                  them out avoids a broken `pytest` on a pip-installed copy.
+
+# Metadata files setuptools does not auto-include (only README.md and the
+# pyproject license-files are automatic):
+include SECURITY.md CHANGELOG.md CONTRIBUTING.md README.zh-CN.md
+
 prune tests
 prune firmware
 prune docs
