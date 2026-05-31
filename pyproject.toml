@@ -38,3 +38,11 @@ Documentation = "https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/p
 [tool.setuptools.packages.find]
 include = ["clawtouch_hid_protocol*"]
 exclude = ["firmware*", "examples*", "docs*", "tests*"]
+
+[tool.pytest.ini_options]
+# importlib import mode lets this package's tests/ be collected alongside the
+# sister clawtouch-mcp tests/ in one pytest run without an "import file
+# mismatch" on the identically-named tests/__init__.py + tests/test_protocol.py.
+# Single-package runs were always fine; this makes the combined monorepo run
+# (`pytest oss/clawtouch-mcp/tests oss/clawtouch-hid/tests`) clean too.
+addopts = "--import-mode=importlib"

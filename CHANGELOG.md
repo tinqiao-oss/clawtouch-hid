@@ -58,84 +58,6 @@ separately on each release.
   (pruned from the sdist) are now absolute GitHub URLs so they resolve on
   the PyPI project page. Added a `Documentation` project URL.
 
-## [1.1.2] — 2026-05-31 — Panic-stop releases mouse buttons (firmware fix)
-
-### Fixed — firmware
-
-- `KEY_RELEASE(0, 0)` / `hid.release_all` (panic stop) now releases held
-  **mouse buttons** as well as keyboard keys. The all-zero panic-stop
-  branch previously called only `keyboard.release_all()`, so a button
-  held via `MOUSE_BUTTON_DOWN` (drag start) — or stuck mid-drag if the
-  host process died before its `MOUSE_BUTTON_UP` — stayed physically
-  pressed, contradicting the documented spec §3.3 panic-stop contract
-  and the `hid.release_all` description. The firmware now also calls
-  `mouse.release_all()` on that branch.
-- Added a firmware-side handler regression test
-  (`tests/test_firmware_handlers.py`). The executor is now importable
-  under CPython (board modules guarded by `_ON_DEVICE`, the hardware
-  loop wrapped in `_main()`), so the panic-stop contract is verified
-  without flashing. On-device behaviour is byte-for-byte unchanged.
-
-Firmware only — **wire protocol unchanged (still v1.1)**,
-`hid_firmware_min` stays `1.0.0`. Old hosts unaffected; flashing
-firmware 1.1.2 is a recommended (non-breaking) upgrade.
-
-## [1.1.1] — 2026-05-31
-### Changed (BREAKING vs <= 1.1.0)
-- Unified keyboard payload byte order to `[modifiers, keycode]`. KEY_PRESS (0x20) and KEY_RELEASE (0x21) previously used `[keycode, modifiers]`; they now match KEY_COMBO (0x23) and the USB HID keyboard report layout (modifier byte first). Breaking wire change for KEY_PRESS/KEY_RELEASE vs firmware <= 1.1.0 — flash firmware 1.1.1 in lockstep. Pre-publish correction; the protocol has not been publicly released.
-
-## [1.1.0] — 2026-05-28 — Independent mouse button press/release (drag gestures + CUA compatibility)
-
-### Added — protocol v1.1: `MOUSE_BUTTON_DOWN` (0x13) / `MOUSE_BUTTON_UP` (0x14)
-
-Two new opcodes let a host program press a mouse button without
-immediately releasing it (and release without pressing). v1.0
-`MOUSE_CLICK` is atomic (press + release in one frame) and remains
-unchanged — old hosts keep working.
-
-Wire payload for both: single byte `[button:u8]`, same encoding as
-`MOUSE_CLICK` (`0x01` LEFT / `0x02` RIGHT / `0x04` MIDDLE).
-
-**Why this exists**:
-- A *drag* in the physical sense is `BUTTON_DOWN` → one or more `MOUSE_MOVE`
-  → `BUTTON_UP`. With only `MOUSE_CLICK` (atomic press+release), a host
-  could not produce a drag at the wire layer.
-- The Anthropic Computer Use action set includes `left_mouse_down` /
-  `left_mouse_up` / `left_click_drag`. v1.1 lets a `clawtouch-mcp`
-  server bridge those actions one-for-one. See
-  `clawtouch-mcp` v0.3.0 release notes for the corresponding tool
-  surface (`hid.mouse_button_down`, `hid.mouse_button_up`, `hid.drag`).
-
-**Firmware semantics**:
-- `BUTTON_UP` on a button that wasn't pressed is a **no-op** (idempotent,
-  no error). This matches HID Boot Mouse behaviour and avoids spurious
-  `ERR_INVALID_PAYLOAD` when a host releases defensively.
-- `KEY_RELEASE(0, 0)` (release-all) still releases held mouse buttons —
-  panic-stop semantics from v1.0 unchanged.
-
-**Spec status**: v1.1 — additive over v1.0 frozen baseline. v1.0
-opcodes are byte-for-byte stable forever (no renumbers, no payload
-edits). Hosts speaking v1.0 keep working against v1.1 firmware; hosts
-speaking v1.1 against v1.0 firmware get `ERR_UNKNOWN_COMMAND` (0x01) on
-the new opcodes and can fall back to `MOUSE_CLICK`.
-
-### Changed
-
-- `clawtouch_hid_protocol.PROTOCOL_VERSION`: `1.0.0` → `1.1.0`
-- Firmware version: `1.0.2` → `1.1.0` (both `firmware/code.py` and the
-  deploy package's `code.py` synced)
-- `docs/protocol-v1.{md,zh-CN.md}`: §3.2 Mouse table gains two rows
-  with `Since v1.1`; new sub-section spells out the drag composition
-  pattern and idempotent-release semantics
-- README "Wire protocol at a glance": "Thirteen command codes" →
-  "Fifteen command codes" (English + Chinese)
-- New protocol roundtrip tests
-  (`test_mouse_button_down_v11` / `test_mouse_button_up_v11` /
-  `test_mouse_button_opcodes_locked_at_13_14`) — lock the 0x13/0x14
-  opcode numbering so any future renumber breaks CI
-
-## [Unreleased]
-
 ### Added — Related Work section in README (EN + zh-CN)
 
 New `## Related work` / `## 相关工作` section between "Open source
@@ -412,6 +334,82 @@ and packaging metadata are now stricter:
 - **Docs / scope wording softened.** Rewrote scope paragraphs in both
   READMEs to describe HID input neutrally — standard driver-stack
   routing, no software on target.
+
+## [1.1.2] — 2026-05-31 — Panic-stop releases mouse buttons (firmware fix)
+
+### Fixed — firmware
+
+- `KEY_RELEASE(0, 0)` / `hid.release_all` (panic stop) now releases held
+  **mouse buttons** as well as keyboard keys. The all-zero panic-stop
+  branch previously called only `keyboard.release_all()`, so a button
+  held via `MOUSE_BUTTON_DOWN` (drag start) — or stuck mid-drag if the
+  host process died before its `MOUSE_BUTTON_UP` — stayed physically
+  pressed, contradicting the documented spec §3.3 panic-stop contract
+  and the `hid.release_all` description. The firmware now also calls
+  `mouse.release_all()` on that branch.
+- Added a firmware-side handler regression test
+  (`tests/test_firmware_handlers.py`). The executor is now importable
+  under CPython (board modules guarded by `_ON_DEVICE`, the hardware
+  loop wrapped in `_main()`), so the panic-stop contract is verified
+  without flashing. On-device behaviour is byte-for-byte unchanged.
+
+Firmware only — **wire protocol unchanged (still v1.1)**,
+`hid_firmware_min` stays `1.0.0`. Old hosts unaffected; flashing
+firmware 1.1.2 is a recommended (non-breaking) upgrade.
+
+## [1.1.1] — 2026-05-31
+### Changed (BREAKING vs <= 1.1.0)
+- Unified keyboard payload byte order to `[modifiers, keycode]`. KEY_PRESS (0x20) and KEY_RELEASE (0x21) previously used `[keycode, modifiers]`; they now match KEY_COMBO (0x23) and the USB HID keyboard report layout (modifier byte first). Breaking wire change for KEY_PRESS/KEY_RELEASE vs firmware <= 1.1.0 — flash firmware 1.1.1 in lockstep. Pre-publish correction; the protocol has not been publicly released.
+
+## [1.1.0] — 2026-05-28 — Independent mouse button press/release (drag gestures + CUA compatibility)
+
+### Added — protocol v1.1: `MOUSE_BUTTON_DOWN` (0x13) / `MOUSE_BUTTON_UP` (0x14)
+
+Two new opcodes let a host program press a mouse button without
+immediately releasing it (and release without pressing). v1.0
+`MOUSE_CLICK` is atomic (press + release in one frame) and remains
+unchanged — old hosts keep working.
+
+Wire payload for both: single byte `[button:u8]`, same encoding as
+`MOUSE_CLICK` (`0x01` LEFT / `0x02` RIGHT / `0x04` MIDDLE).
+
+**Why this exists**:
+- A *drag* in the physical sense is `BUTTON_DOWN` → one or more `MOUSE_MOVE`
+  → `BUTTON_UP`. With only `MOUSE_CLICK` (atomic press+release), a host
+  could not produce a drag at the wire layer.
+- The Anthropic Computer Use action set includes `left_mouse_down` /
+  `left_mouse_up` / `left_click_drag`. v1.1 lets a `clawtouch-mcp`
+  server bridge those actions one-for-one. See
+  `clawtouch-mcp` v0.3.0 release notes for the corresponding tool
+  surface (`hid.mouse_button_down`, `hid.mouse_button_up`, `hid.drag`).
+
+**Firmware semantics**:
+- `BUTTON_UP` on a button that wasn't pressed is a **no-op** (idempotent,
+  no error). This matches HID Boot Mouse behaviour and avoids spurious
+  `ERR_INVALID_PAYLOAD` when a host releases defensively.
+- `KEY_RELEASE(0, 0)` (release-all) still releases held mouse buttons —
+  panic-stop semantics from v1.0 unchanged.
+
+**Spec status**: v1.1 — additive over v1.0 frozen baseline. v1.0
+opcodes are byte-for-byte stable forever (no renumbers, no payload
+edits). Hosts speaking v1.0 keep working against v1.1 firmware; hosts
+speaking v1.1 against v1.0 firmware get `ERR_UNKNOWN_COMMAND` (0x01) on
+the new opcodes and can fall back to `MOUSE_CLICK`.
+
+### Changed
+
+- `clawtouch_hid_protocol.PROTOCOL_VERSION`: `1.0.0` → `1.1.0`
+- Firmware version: `1.0.2` → `1.1.0` (both `firmware/code.py` and the
+  deploy package's `code.py` synced)
+- `docs/protocol-v1.{md,zh-CN.md}`: §3.2 Mouse table gains two rows
+  with `Since v1.1`; new sub-section spells out the drag composition
+  pattern and idempotent-release semantics
+- README "Wire protocol at a glance": "Thirteen command codes" →
+  "Fifteen command codes" (English + Chinese)
+- New protocol roundtrip tests
+  (`test_mouse_button_down_v11` / `test_mouse_button_up_v11` /
+  `test_mouse_button_opcodes_locked_at_13_14`) — lock the 0x13/0x14
+  opcode numbering so any future renumber breaks CI
 
 ## [1.0.0] — 2026-05-17 — First public release (protocol frozen 2026-03-15)
 

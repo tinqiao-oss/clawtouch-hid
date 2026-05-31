@@ -147,7 +147,7 @@ see the **Autonomy & safety** section in the
 | Microcontroller | RP2350 (Raspberry Pi Pico 2 reference board) |
 | Firmware framework | CircuitPython 10.x |
 | Wire protocol | epoch 1 (frozen envelope 2026-03-15; opcodes additive) |
-| USB interfaces | HID (keyboard + mouse) + CDC (console + data) |
+| USB interfaces | HID (keyboard + mouse) + CDC (console + data) + USB mass storage (`CIRCUITPY` drive, dev firmware — see note below) |
 | CDC baud rate | 115200 (data channel) |
 
 You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
@@ -254,7 +254,8 @@ lives in [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/
 clawtouch-hid/
 ├── clawtouch_hid_protocol/   ← Python protocol module (host-side, pip-installable)
 ├── firmware/                 ← CircuitPython firmware for the Pico 2
-│   ├── boot.py               ← USB descriptor setup (runs once at boot)
+│   ├── boot.py               ← USB config (DEV: HID + CDC console/data + CIRCUITPY drive)
+│   ├── boot_production.py    ← USB config (locked-down: HID + CDC data only)
 │   ├── code.py               ← HID executor main loop
 │   ├── packet_parser.py      ← Frame extractor, hardware-free for PC tests
 │   └── lib/adafruit_hid/     ← Bundled HID library (MIT, see NOTICE)

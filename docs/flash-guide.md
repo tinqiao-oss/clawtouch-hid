@@ -108,6 +108,40 @@ After unplugging and replugging:
    appear as `/dev/tty.usbmodem*` or `/dev/ttyACM*`.
 3. **PING:** run [`examples/ping_test.py`](../examples/ping_test.py)
    pointed at the **data** port. You should see `PONG received`.
+4. **`CIRCUITPY` drive:** with this (development) firmware the `CIRCUITPY`
+   USB mass-storage drive stays mounted on the host — intentional, so the
+   firmware stays editable in place. On a locked-down / enterprise host
+   where a removable drive is unwanted (USB-storage policies, scans, audit
+   entries), flash the production firmware instead — see
+   **Production (locked-down) firmware** below.
+
+## Production (locked-down) firmware
+
+The default `boot.py` is the **development** variant: it keeps the
+CircuitPython REPL console and the `CIRCUITPY` USB mass-storage drive
+exposed to the host so the board stays debuggable and the firmware editable
+in place. On a deployed device you usually want the controlled host to see
+**only** the HID keyboard/mouse and the CDC data channel — no removable
+drive, no REPL.
+
+To harden it, copy [`firmware/boot_production.py`](../firmware/boot_production.py)
+onto the `CIRCUITPY` drive **renamed to `boot.py`** (overwriting the dev
+`boot.py`), then eject and replug:
+
+```bash
+# from the CIRCUITPY drive root
+cp boot_production.py boot.py   # or copy + rename in your file manager
+```
+
+> CircuitPython only runs the file literally named `boot.py`, so
+> `boot_production.py` is inert until you rename it. After this the device
+> exposes only HID + CDC data — the `CIRCUITPY` drive and the REPL console
+> disappear.
+>
+> **Caveat:** with the drive hidden you can no longer edit files over USB.
+> To make further changes, re-enter **BOOTSEL** and re-flash CircuitPython
+> (Step 1), which restores the editable `CIRCUITPY` drive, then re-copy the
+> firmware.
 
 ## Upgrading the firmware
 
