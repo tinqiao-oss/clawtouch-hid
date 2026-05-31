@@ -121,15 +121,14 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 
 | 命令             | 代码   | Payload                              | 说明 |
 |------------------|--------|--------------------------------------|------|
-| KEY_PRESS        | `0x20` | `[keycode:uint8] [modifiers:uint8]`  | 按键 |
-| KEY_RELEASE      | `0x21` | `[keycode:uint8] [modifiers:uint8]`  | 松键(全 0 = 全部释放) |
+| KEY_PRESS        | `0x20` | `[modifiers:uint8] [keycode:uint8]`  | 按键 |
+| KEY_RELEASE      | `0x21` | `[modifiers:uint8] [keycode:uint8]`  | 松键(全 0 = 全部释放) |
 | KEY_TYPE_STRING  | `0x22` | UTF-8 字符串                         | 逐字符输入(US 布局) |
 | KEY_COMBO        | `0x23` | `[modifiers:uint8] [keycode:uint8]`  | 快捷键组合 |
 
-> ⚠️ **`KEY_PRESS` 与 `KEY_COMBO` 的 payload 字节序不同。**
-> `KEY_PRESS` 是 `[keycode, modifiers]`,`KEY_COMBO` 是
-> `[modifiers, keycode]`。这是 v1.0 保留的历史小怪点。三处参考实现
-> (固件、`clawtouch_hid_protocol`、本规范)一致。
+三条键盘命令的 payload 字节序一致 —— 都是 `[modifiers, keycode]`,
+与 USB HID 键盘报告布局一致(modifier 字节在前)。三处参考实现
+(固件、`clawtouch_hid_protocol`、本规范)一致。
 
 ### 3.4 Modifier 位掩码
 

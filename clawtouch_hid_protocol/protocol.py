@@ -26,7 +26,7 @@ import struct
 from dataclasses import dataclass
 from enum import IntEnum
 
-PROTOCOL_VERSION = "1.1.0"
+PROTOCOL_VERSION = "1.1.1"
 FRAME_HEADER = 0xAA
 MAX_PAYLOAD_LEN = 1024
 
@@ -178,24 +178,26 @@ def build_mouse_button_up(button: MouseButton, *, seq_id: int = 0) -> HidCommand
 
 
 def build_key_press(keycode: int, modifiers: int = 0, *, seq_id: int = 0) -> HidCommand:
-    """KEY_PRESS payload is ``[keycode, modifiers]`` — note this differs
-    from :func:`build_key_combo` which is ``[modifiers, keycode]``."""
-    payload = struct.pack("BB", int(keycode), int(modifiers))
+    """KEY_PRESS payload is ``[modifiers, keycode]`` (unified v1.1.1 — same
+    as :func:`build_key_release` and :func:`build_key_combo`; matches the
+    USB HID keyboard report layout where the modifier byte comes first)."""
+    payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_PRESS, payload, seq_id)
 
 
 def build_key_release(keycode: int = 0, modifiers: int = 0, *, seq_id: int = 0) -> HidCommand:
-    """KEY_RELEASE payload is ``[keycode, modifiers]`` — same byte order
-    as :func:`build_key_press`. Both arguments zero (the default) is
-    panic-stop semantics: firmware releases every held key and mouse
-    button. Pass explicit keycode/modifiers to release a specific key."""
-    payload = struct.pack("BB", int(keycode), int(modifiers))
+    """KEY_RELEASE payload is ``[modifiers, keycode]`` — same byte order
+    as :func:`build_key_press` and :func:`build_key_combo` (unified v1.1.1).
+    Both arguments zero (the default) is panic-stop semantics: firmware
+    releases every held key and mouse button. Pass explicit
+    keycode/modifiers to release a specific key."""
+    payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_RELEASE, payload, seq_id)
 
 
 def build_key_combo(modifiers: int, keycode: int, *, seq_id: int = 0) -> HidCommand:
-    """KEY_COMBO payload is ``[modifiers, keycode]`` — note this differs
-    from :func:`build_key_press` which is ``[keycode, modifiers]``."""
+    """KEY_COMBO payload is ``[modifiers, keycode]`` — same byte order as
+    :func:`build_key_press` and :func:`build_key_release` (unified v1.1.1)."""
     payload = struct.pack("BB", int(modifiers), int(keycode))
     return HidCommand(CommandType.KEY_COMBO, payload, seq_id)
 

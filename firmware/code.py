@@ -55,7 +55,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.1.0"
+FIRMWARE_VERSION = "1.1.1"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
@@ -240,8 +240,8 @@ class HidExecutor:
         if len(payload) < 2:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "PRESS:2B")
             return
-        # KEY_PRESS payload is [keycode, modifiers] — KEY_COMBO is the reverse
-        keycode, modifiers = struct.unpack("BB", payload[:2])
+        # KEY_PRESS payload is [modifiers, keycode] — same as KEY_RELEASE/KEY_COMBO (unified v1.1.1)
+        modifiers, keycode = struct.unpack("BB", payload[:2])
         keys = self._collect_keys(modifiers, keycode)
         if keys:
             self.keyboard.press(*keys)
@@ -251,7 +251,7 @@ class HidExecutor:
         if len(payload) < 2:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "REL:2B")
             return
-        keycode, modifiers = struct.unpack("BB", payload[:2])
+        modifiers, keycode = struct.unpack("BB", payload[:2])
         if keycode == 0 and modifiers == 0:
             self.keyboard.release_all()
         else:
@@ -277,7 +277,7 @@ class HidExecutor:
         if len(payload) < 2:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "COMBO:2B")
             return
-        # KEY_COMBO payload is [modifiers, keycode] — KEY_PRESS is the reverse
+        # KEY_COMBO payload is [modifiers, keycode] — same as KEY_PRESS/KEY_RELEASE (unified v1.1.1)
         modifiers, keycode = struct.unpack("BB", payload[:2])
         keys = self._collect_keys(modifiers, keycode)
         if keys:

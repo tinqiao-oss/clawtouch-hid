@@ -224,17 +224,6 @@ clawtouch-hid/
 * **以值为准,不以名为准。** 固件、`clawtouch_hid_protocol` 模块、协议
   spec 三处各列了一份命令码。数值是真理,Python 名称只是为了可读。
 
-## 协议小怪点(知道了就行)
-
-`KEY_PRESS` 和 `KEY_COMBO` 的 payload 字节序不一样:
-
-* `KEY_PRESS` (0x20):`[keycode, modifiers]`
-* `KEY_COMBO` (0x23):`[modifiers, keycode]`
-
-这是文档化的行为,不是 bug —— `KEY_COMBO` 历史上是从单独的"发快捷键"
-意图长出来的,保留了自己的布局。三处实现(固件、协议模块、spec)
-一致。如果你写第四份实现,注意顺序。
-
 ## 开源路线图
 
 ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业产品闭源。

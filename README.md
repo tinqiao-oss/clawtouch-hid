@@ -262,18 +262,6 @@ clawtouch-hid/
   command codes independently. The numbers are the source of truth; the
   Python names exist for readability only.
 
-## Protocol quirk worth knowing
-
-`KEY_PRESS` and `KEY_COMBO` use different payload byte orders:
-
-* `KEY_PRESS` (0x20): `[keycode, modifiers]`
-* `KEY_COMBO` (0x23): `[modifiers, keycode]`
-
-This is documented behavior, not a bug — `KEY_COMBO` historically grew out
-of a separate "send a shortcut" intent and kept its own layout. All three
-implementations (firmware, protocol module, spec) agree. If you write a
-fourth implementation, mind the order.
-
 ## Open source roadmap
 
 ClawTouch follows an **open-core** model: hardware and protocol primitives

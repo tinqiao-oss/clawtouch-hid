@@ -40,11 +40,12 @@ from clawtouch_hid_protocol import (
 
 
 class TestSpecConstants:
-    def test_protocol_version_is_1_1_0(self):
-        # v1.0 baseline frozen 2026-03-15; v1.1 (2026-05-28) added
-        # MOUSE_BUTTON_DOWN/UP for drag gestures + CUA compatibility.
-        # v1.0 opcodes byte-for-byte stable forever.
-        assert PROTOCOL_VERSION == "1.1.0"
+    def test_protocol_version_is_1_1_1(self):
+        # v1.0 baseline 2026-03-15; v1.1 (2026-05-28) added MOUSE_BUTTON_DOWN/UP
+        # for drag + CUA; v1.1.1 (2026-05-29, pre-publish) unified
+        # KEY_PRESS/RELEASE payload to [modifiers, keycode] to match KEY_COMBO
+        # and the USB HID keyboard report layout.
+        assert PROTOCOL_VERSION == "1.1.1"
 
     def test_frame_header_is_AA(self):
         assert FRAME_HEADER == 0xAA
@@ -98,10 +99,9 @@ class TestRoundtrip:
         assert decoded.payload.decode("utf-8") == "emoji 🦞"
 
     def test_combo_byte_order_locked(self):
-        """KEY_COMBO is [modifiers, keycode] — opposite of KEY_PRESS.
+        """KEY_COMBO is [modifiers, keycode] — same as KEY_PRESS/KEY_RELEASE (unified v1.1.1).
 
-        This quirk is documented in README. Any reorder breaks the firmware
-        silently. Keep this test.
+        Any reorder breaks the firmware silently. Keep this test.
         """
         wire = build_key_combo(int(ModifierKey.CTRL), 0x04).serialize()
         decoded = HidCommand.deserialize(wire)
@@ -109,11 +109,11 @@ class TestRoundtrip:
         assert decoded.payload[1] == 0x04
 
     def test_press_byte_order_locked(self):
-        """KEY_PRESS is [keycode, modifiers] — opposite of KEY_COMBO."""
+        """KEY_PRESS is [modifiers, keycode] — unified with KEY_RELEASE/KEY_COMBO (v1.1.1)."""
         wire = build_key_press(0x04, int(ModifierKey.CTRL)).serialize()
         decoded = HidCommand.deserialize(wire)
-        assert decoded.payload[0] == 0x04  # keycode first
-        assert decoded.payload[1] == 0x01
+        assert decoded.payload[0] == 0x01  # modifiers first (CTRL)
+        assert decoded.payload[1] == 0x04  # keycode
 
     def test_release_all_payload_is_two_zero_bytes(self):
         """KEY_RELEASE with default args is panic-stop: payload [0x00, 0x00].
@@ -128,13 +128,13 @@ class TestRoundtrip:
         assert decoded.payload == b"\x00\x00"
 
     def test_release_specific_keycode_modifiers(self):
-        """KEY_RELEASE payload byte order matches KEY_PRESS: [keycode, modifiers]."""
+        """KEY_RELEASE byte order matches KEY_PRESS/KEY_COMBO: [modifiers, keycode] (v1.1.1)."""
         wire = build_key_release(0x04, int(ModifierKey.SHIFT), seq_id=3).serialize()
         decoded = HidCommand.deserialize(wire)
         assert decoded.cmd_type == CommandType.KEY_RELEASE
         assert decoded.seq_id == 3
-        assert decoded.payload[0] == 0x04  # keycode first
-        assert decoded.payload[1] == int(ModifierKey.SHIFT)
+        assert decoded.payload[0] == int(ModifierKey.SHIFT)  # modifiers first
+        assert decoded.payload[1] == 0x04  # keycode
 
     def test_mouse_button_down_v11(self):
         """v1.1: MOUSE_BUTTON_DOWN payload is single byte [button:u8]."""

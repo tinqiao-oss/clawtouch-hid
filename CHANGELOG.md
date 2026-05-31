@@ -9,6 +9,10 @@ edits to existing ones. The `clawtouch-hid-protocol` Python package
 tracks the protocol version; the firmware version is tagged
 separately on each release.
 
+## [1.1.1] - 2026-05-29
+### Changed (BREAKING vs <= 1.1.0)
+- Unified keyboard payload byte order to `[modifiers, keycode]`. KEY_PRESS (0x20) and KEY_RELEASE (0x21) previously used `[keycode, modifiers]`; they now match KEY_COMBO (0x23) and the USB HID keyboard report layout (modifier byte first). Breaking wire change for KEY_PRESS/KEY_RELEASE vs firmware <= 1.1.0 — flash firmware 1.1.1 in lockstep. Pre-publish correction; the protocol has not been publicly released.
+
 ## [1.1.0] — 2026-05-28 — Independent mouse button press/release (drag gestures + CUA compatibility)
 
 ### Added — protocol v1.1: `MOUSE_BUTTON_DOWN` (0x13) / `MOUSE_BUTTON_UP` (0x14)
@@ -328,8 +332,9 @@ and packaging metadata are now stricter:
   spec describes; non-zero values release a specific key.
 - Two new locked round-trip tests in `tests/test_protocol.py` for
   release-all and release-specific so the byte-order contract
-  (`[keycode, modifiers]`, same as `KEY_PRESS`) cannot silently
-  regress.
+  (same as `KEY_PRESS`) cannot silently regress. (The shared keyboard
+  byte order was later unified to `[modifiers, keycode]` in 1.1.1 —
+  see the entry at the top of this file.)
 
 ### Changed
 
@@ -375,12 +380,13 @@ first public bundle shipping it.
 - Firmware is CircuitPython-only. RP2350 MicroPython / C SDK ports
   would be welcome contributions but are not maintained upstream.
 
-### Protocol quirk worth knowing
+### Keyboard payload byte order
 
-`KEY_PRESS` (0x20) uses payload `[keycode, modifiers]`; `KEY_COMBO`
-(0x23) uses `[modifiers, keycode]`. This asymmetry is intentional
-(historical) and is locked by both the spec and the test suite —
-any reorder breaks the firmware silently.
+`KEY_PRESS` (0x20) and `KEY_RELEASE` (0x21) used payload
+`[keycode, modifiers]` in this release, while `KEY_COMBO` (0x23) used
+`[modifiers, keycode]`. (This pre-publish inconsistency was later
+unified to `[modifiers, keycode]` across all three keyboard commands
+in 1.1.1 — see the entry at the top of this file.)
 
 [Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/tinqiao-oss/clawtouch-hid/releases/tag/v1.0.0

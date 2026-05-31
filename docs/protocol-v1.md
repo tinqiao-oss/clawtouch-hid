@@ -127,16 +127,15 @@ All multi-byte integers are little-endian.
 
 | Command          | Code   | Payload                              | Notes |
 |------------------|--------|--------------------------------------|-------|
-| KEY_PRESS        | `0x20` | `[keycode:uint8] [modifiers:uint8]`  | Press key |
-| KEY_RELEASE      | `0x21` | `[keycode:uint8] [modifiers:uint8]`  | Release key (all-zero = release-all) |
+| KEY_PRESS        | `0x20` | `[modifiers:uint8] [keycode:uint8]`  | Press key |
+| KEY_RELEASE      | `0x21` | `[modifiers:uint8] [keycode:uint8]`  | Release key (all-zero = release-all) |
 | KEY_TYPE_STRING  | `0x22` | UTF-8 string                         | Type as characters (US layout) |
 | KEY_COMBO        | `0x23` | `[modifiers:uint8] [keycode:uint8]`  | Press + release shortcut |
 
-> ⚠️ **Payload byte order differs between `KEY_PRESS` and `KEY_COMBO`.**
-> `KEY_PRESS` is `[keycode, modifiers]`; `KEY_COMBO` is
-> `[modifiers, keycode]`. This is a known historical quirk preserved
-> for v1.0 compatibility. All reference implementations (firmware,
-> `clawtouch_hid_protocol`, this spec) agree.
+All three keyboard commands share the same payload byte order —
+`[modifiers, keycode]` — matching the USB HID keyboard report layout
+(modifier byte first). All reference implementations (firmware,
+`clawtouch_hid_protocol`, this spec) agree.
 
 ### 3.4 Modifier bitmask
 
