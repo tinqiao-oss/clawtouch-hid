@@ -1,0 +1,16 @@
+# PyPI sdist contents.
+#
+# Ship only the installable protocol package plus metadata (README +
+# license-files are added automatically by setuptools from pyproject).
+# Everything below is a GitHub-clone concern, not a pip-install concern:
+#
+#   - firmware/  : Pico CircuitPython code, flashed from a repo clone.
+#   - docs/      : protocol spec + flash guide.
+#   - examples/  : runnable smoke tests.
+#   - tests/     : import firmware/ via sys.path, so they FAIL if shipped
+#                  in an sdist that (correctly) excludes firmware/. Keeping
+#                  them out avoids a broken `pytest` on a pip-installed copy.
+prune tests
+prune firmware
+prune docs
+prune examples

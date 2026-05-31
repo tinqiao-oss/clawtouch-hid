@@ -1,10 +1,21 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
-"""ClawTouch HID firmware v1.1.0 — Raspberry Pi Pico 2.
+"""ClawTouch HID firmware v1.1.2 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data
 channel and executes the corresponding HID action. The firmware does
 nothing on its own — all decisions live on the host.
+
+v1.1.2 (2026-05-31): panic-stop now releases mouse buttons too. The
+all-zero ``KEY_RELEASE(0, 0)`` (a.k.a. ``hid.release_all``) branch used
+to call only ``keyboard.release_all()``; a button held via
+``MOUSE_BUTTON_DOWN`` (drag start) stayed physically pressed. It now also
+calls ``mouse.release_all()`` so the documented panic-stop semantics
+(spec §3.3) actually hold. Wire-compatible — old hosts unaffected.
+
+v1.1.1 (2026-05-31): KEY_PRESS / KEY_RELEASE payload byte order unified
+to ``[modifiers, keycode]`` (matching KEY_COMBO and the USB HID keyboard
+report layout). Affects the two keyboard opcodes' payload only.
 
 v1.1.0 (2026-05-28): implements two new opcodes from protocol v1.1 —
 ``MOUSE_BUTTON_DOWN`` (0x13) and ``MOUSE_BUTTON_UP`` (0x14). These
@@ -35,15 +46,25 @@ older hosts keep working unchanged, hid_firmware_min stays at "1.0.0".
 
 Framework: CircuitPython 10.x
 Hardware:  Raspberry Pi Pico 2 (RP2350)
-Protocol:  ClawTouch HID Protocol v1.0 (see ../docs/protocol-v1.md)
+Protocol:  ClawTouch HID Protocol v1.1 (see ../docs/protocol-v1.md)
 """
 
 import struct
 import json
 import time
-import usb_hid
-import usb_cdc
-import supervisor
+
+try:
+    # Board-only modules. On the Pico these import cleanly; under CPython
+    # (unit tests) they are absent — or a same-named PyPI shim errors at
+    # import — so the hardware entry point at the bottom (`_main`) is
+    # skipped and only HidExecutor is exercised. Broad except on purpose:
+    # any failure to load the board stack means "not on the device".
+    import usb_hid
+    import usb_cdc
+    import supervisor
+    _ON_DEVICE = True
+except Exception:  # noqa: BLE001
+    _ON_DEVICE = False
 
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
@@ -55,7 +76,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.1.1"
+FIRMWARE_VERSION = "1.1.2"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
@@ -253,7 +274,13 @@ class HidExecutor:
             return
         modifiers, keycode = struct.unpack("BB", payload[:2])
         if keycode == 0 and modifiers == 0:
+            # Panic-stop semantics (spec §3.3): release every held key AND
+            # mouse button. keyboard and mouse are separate HID objects, so
+            # a button held via MOUSE_BUTTON_DOWN (drag start) must be
+            # cleared here too — otherwise release-all leaves it physically
+            # pressed and the documented panic stop fails to lift a drag.
             self.keyboard.release_all()
+            self.mouse.release_all()
         else:
             for k in self._collect_keys(modifiers, keycode):
                 self.keyboard.release(k)
@@ -342,79 +369,88 @@ class HidExecutor:
 # a flashed unit sees the upstream identity in the CDC console.
 # ════════════════════════════════════════════════════════════════════
 
-print()
-print(" ╔═╗╦  ╔═╗╦ ╦╦═╗╔═╗╦ ╦╔═╗╦ ╦")
-print(" ║  ║  ╠═╣║║║ ║ ║ ║║ ║║  ╠═╣")
-print(" ╚═╝╩═╝╩ ╩╚╩╝ ╩ ╚═╝╚═╝╚═╝╩ ╩")
-print(" clawtouch-hid firmware v" + FIRMWARE_VERSION + " · Tinqiao Technology")
-print(" MIT · github.com/tinqiao-oss/clawtouch-hid")
-print()
-
 # ════════════════════════════════════════════════════════════════════
 # Main loop (CircuitPython entry point)
+# Wrapped in _main() + guarded by _ON_DEVICE so the module can be
+# imported under CPython for unit tests (HidExecutor handler tests)
+# without spinning the hardware loop. On the Pico _ON_DEVICE is True and
+# behaviour is byte-for-byte unchanged.
 # ════════════════════════════════════════════════════════════════════
 
-# Onboard LED indicator (1Hz heartbeat once running)
-try:
-    import digitalio
-    import board
-    led = digitalio.DigitalInOut(board.LED)
-    led.direction = digitalio.Direction.OUTPUT
-    led.value = True
-except Exception:
-    led = None
+def _main():
+    print()
+    print(" ╔═╗╦  ╔═╗╦ ╦╦═╗╔═╗╦ ╦╔═╗╦ ╦")
+    print(" ║  ║  ╠═╣║║║ ║ ║ ║║ ║║  ╠═╣")
+    print(" ╚═╝╩═╝╩ ╩╚╩╝ ╩ ╚═╝╚═╝╚═╝╩ ╩")
+    print(" clawtouch-hid firmware v" + FIRMWARE_VERSION + " · Tinqiao Technology")
+    print(" MIT · github.com/tinqiao-oss/clawtouch-hid")
+    print()
 
-# Initialise HID devices
-keyboard = Keyboard(usb_hid.devices)
-mouse = Mouse(usb_hid.devices)
-layout = KeyboardLayoutUS(keyboard)
-serial = usb_cdc.data
+    # Onboard LED indicator (1Hz heartbeat once running)
+    try:
+        import digitalio
+        import board
+        led = digitalio.DigitalInOut(board.LED)
+        led.direction = digitalio.Direction.OUTPUT
+        led.value = True
+    except Exception:
+        led = None
 
-executor = HidExecutor(keyboard, mouse, layout, serial)
+    # Initialise HID devices
+    keyboard = Keyboard(usb_hid.devices)
+    mouse = Mouse(usb_hid.devices)
+    layout = KeyboardLayoutUS(keyboard)
+    serial = usb_cdc.data
 
-buf = bytearray()
+    executor = HidExecutor(keyboard, mouse, layout, serial)
 
-while True:
-    if serial and serial.in_waiting:
-        incoming = serial.read(serial.in_waiting)
-        if incoming:
-            buf.extend(incoming)
+    buf = bytearray()
 
-            # Extract complete frames.
-            # Frame sync uses bytearray.find + del [:idx] instead of pop(0)
-            # in a loop: pop(0) is O(n) memmove per call. A noisy or
-            # adversarial USB stream (e.g. a long run of non-HEADER bytes)
-            # would spend CPU time linearly memmove-ing the whole buffer
-            # for each byte, stalling USB interrupt response on the Pico.
-            # find+del covers the same range in a single O(n) memmove.
-            # (round 4 fixed this in packet_parser.py; this main loop is
-            # the same-source bug that was missed there — round 5 fix.)
-            while len(buf) >= 7:
-                if buf[0] != HEADER:
-                    idx = buf.find(HEADER)
-                    if idx < 0:
-                        buf = bytearray()
+    while True:
+        if serial and serial.in_waiting:
+            incoming = serial.read(serial.in_waiting)
+            if incoming:
+                buf.extend(incoming)
+
+                # Extract complete frames.
+                # Frame sync uses bytearray.find + del [:idx] instead of pop(0)
+                # in a loop: pop(0) is O(n) memmove per call. A noisy or
+                # adversarial USB stream (e.g. a long run of non-HEADER bytes)
+                # would spend CPU time linearly memmove-ing the whole buffer
+                # for each byte, stalling USB interrupt response on the Pico.
+                # find+del covers the same range in a single O(n) memmove.
+                # (round 4 fixed this in packet_parser.py; this main loop is
+                # the same-source bug that was missed there — round 5 fix.)
+                while len(buf) >= 7:
+                    if buf[0] != HEADER:
+                        idx = buf.find(HEADER)
+                        if idx < 0:
+                            buf = bytearray()
+                            break
+                        del buf[:idx]
+                        if len(buf) < 7:
+                            break
+
+                    payload_len = struct.unpack_from("<H", buf, 4)[0]
+                    if payload_len > MAX_PAYLOAD_LEN:
+                        # Skip this HEADER and resync from the next byte.
+                        del buf[:1]
+                        continue
+
+                    total_len = 7 + payload_len
+                    if len(buf) < total_len:
                         break
-                    del buf[:idx]
-                    if len(buf) < 7:
-                        break
 
-                payload_len = struct.unpack_from("<H", buf, 4)[0]
-                if payload_len > MAX_PAYLOAD_LEN:
-                    # Skip this HEADER and resync from the next byte.
-                    del buf[:1]
-                    continue
+                    packet = bytes(buf[:total_len])
+                    buf = buf[total_len:]
+                    executor.process_packet(packet)
 
-                total_len = 7 + payload_len
-                if len(buf) < total_len:
-                    break
+        executor._uptime_ms = supervisor.ticks_ms()
 
-                packet = bytes(buf[:total_len])
-                buf = buf[total_len:]
-                executor.process_packet(packet)
+        # LED heartbeat (1Hz)
+        if led:
+            led.value = (executor._uptime_ms // 500) % 2 == 0
 
-    executor._uptime_ms = supervisor.ticks_ms()
 
-    # LED heartbeat (1Hz)
-    if led:
-        led.value = (executor._uptime_ms // 500) % 2 == 0
+if _ON_DEVICE:
+    _main()

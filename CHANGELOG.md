@@ -9,6 +9,28 @@ edits to existing ones. The `clawtouch-hid-protocol` Python package
 tracks the protocol version; the firmware version is tagged
 separately on each release.
 
+## [1.1.2] — 2026-05-31 — Panic-stop releases mouse buttons (firmware fix)
+
+### Fixed — firmware
+
+- `KEY_RELEASE(0, 0)` / `hid.release_all` (panic stop) now releases held
+  **mouse buttons** as well as keyboard keys. The all-zero panic-stop
+  branch previously called only `keyboard.release_all()`, so a button
+  held via `MOUSE_BUTTON_DOWN` (drag start) — or stuck mid-drag if the
+  host process died before its `MOUSE_BUTTON_UP` — stayed physically
+  pressed, contradicting the documented spec §3.3 panic-stop contract
+  and the `hid.release_all` description. The firmware now also calls
+  `mouse.release_all()` on that branch.
+- Added a firmware-side handler regression test
+  (`tests/test_firmware_handlers.py`). The executor is now importable
+  under CPython (board modules guarded by `_ON_DEVICE`, the hardware
+  loop wrapped in `_main()`), so the panic-stop contract is verified
+  without flashing. On-device behaviour is byte-for-byte unchanged.
+
+Firmware only — **wire protocol unchanged (still v1.1)**,
+`hid_firmware_min` stays `1.0.0`. Old hosts unaffected; flashing
+firmware 1.1.2 is a recommended (non-breaking) upgrade.
+
 ## [1.1.1] - 2026-05-29
 ### Changed (BREAKING vs <= 1.1.0)
 - Unified keyboard payload byte order to `[modifiers, keycode]`. KEY_PRESS (0x20) and KEY_RELEASE (0x21) previously used `[keycode, modifiers]`; they now match KEY_COMBO (0x23) and the USB HID keyboard report layout (modifier byte first). Breaking wire change for KEY_PRESS/KEY_RELEASE vs firmware <= 1.1.0 — flash firmware 1.1.1 in lockstep. Pre-publish correction; the protocol has not been publicly released.
@@ -388,5 +410,8 @@ first public bundle shipping it.
 unified to `[modifiers, keycode]` across all three keyboard commands
 in 1.1.1 — see the entry at the top of this file.)
 
-[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/tinqiao-oss/clawtouch-hid/releases/tag/v1.0.0
