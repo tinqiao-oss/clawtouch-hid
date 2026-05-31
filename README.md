@@ -120,6 +120,25 @@ image, audio, or video content. Content-generation obligations
 2025-09-01) attach to whatever upstream agent drives this firmware,
 not to the firmware itself.
 
+## Autonomy & safety
+
+The firmware is a generic HID executor: it faithfully turns whatever
+frames the host sends into HID reports, with no on-device guardrail and
+no inspection of intent. The properties this README sells as features —
+input that the OS treats like a physical keyboard/mouse, and "all
+decisions live on the host" — have a symmetric consequence: an
+autonomous agent driving the board has, in practice, the same reach
+over the target as a person at the keyboard, and that can happen against
+the user's intent via prompt injection, model error, or over-broad
+autonomy.
+
+This is an agent-behavior / deployment risk, not a firmware bug (see
+[SECURITY.md](SECURITY.md)). For the full risk disclosure and the
+operator mitigations (dedicated/least-privilege host, human-in-the-loop,
+network isolation, panic stop, treating screen content as untrusted),
+see the **Autonomy & safety** section in the
+[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md).
+
 ## Hardware
 
 | Item | Spec |
