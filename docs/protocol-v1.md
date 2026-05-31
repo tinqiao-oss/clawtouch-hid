@@ -1,11 +1,23 @@
 **English** | [简体中文](protocol-v1.zh-CN.md)
 
-# ClawTouch HID Wire Protocol v1.1
+# ClawTouch HID Wire Protocol — Epoch 1
 
-> **Status:** v1.1 — additive over v1.0 frozen baseline
-> **v1.0 frozen:** 2026-03-15 (existing opcodes are byte-for-byte stable forever)
-> **v1.1 added:** 2026-05-28 (`MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` for independent
-> press/release — required for drag gestures and Anthropic Computer Use compatibility)
+> **Wire epoch:** `1` — the frame envelope in §2, frozen 2026-03-15. The
+> epoch is a single integer; it bumps **only** on a breaking change to the
+> frame envelope or to an existing opcode's meaning (by design, almost
+> never). New opcodes are added *additively within* the epoch and never
+> bump it.
+> **Not SemVer.** The wire protocol is identified by its epoch, not a
+> `major.minor.patch`. The thing with SemVer is the `clawtouch-hid-protocol`
+> Python package that *describes* this epoch (currently `1.1.1`) — and,
+> separately, the firmware (currently `1.1.2`). Do not confuse epoch with
+> either package version. Where older notes say "protocol v1.0 / v1.1",
+> read them as **opcode-set milestones** (module releases) within epoch 1,
+> not wire-protocol versions.
+> **Opcode-set history within epoch 1:** baseline opcodes frozen
+> 2026-03-15; `MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` (`0x13` / `0x14`)
+> added additively 2026-05-28 for drag gestures + Anthropic Computer Use
+> parity.
 > **Scope:** Host (PC) ↔ ClawTouch HID device (Raspberry Pi Pico 2)
 
 ---

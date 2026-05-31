@@ -8,7 +8,7 @@
 > drive the board directly.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Protocol: v1.1](https://img.shields.io/badge/protocol-v1.1-blue.svg)](docs/protocol-v1.md)
+[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](docs/protocol-v1.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
@@ -30,12 +30,13 @@ external program (running on your PC) can drive over a serial command channel:
    **nothing on its own** — it waits for framed commands on the CDC data port
    and translates each one into a HID report.
 2. **`clawtouch_hid_protocol/`** — a small, dependency-free Python module
-   that defines the v1.1 wire protocol (command codes, payload layouts,
-   frame helpers; v1.0 baseline frozen 2026-03-15, v1.1 additive). Use it
-   from your own host program if you want to talk to the board directly
-   without going through MCP or any other layer.
-3. **`docs/`** — the [v1.1 protocol specification](docs/protocol-v1.md)
-   (v1.0 baseline frozen, v1.1 additive) and a step-by-step
+   that describes the wire protocol (command codes, payload layouts, frame
+   helpers). The wire format is **epoch 1** (frozen frame envelope); this
+   module is its SemVer-versioned description (the drag opcodes were added
+   additively within epoch 1). Use it from your own host program to talk to
+   the board directly without going through MCP or any other layer.
+3. **`docs/`** — the [wire protocol specification](docs/protocol-v1.md)
+   (epoch 1 — frozen envelope, opcodes additive) and a step-by-step
    [flash guide](docs/flash-guide.md).
 
 The board is also the hardware that the [clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)
@@ -145,7 +146,7 @@ see the **Autonomy & safety** section in the
 |------|------|
 | Microcontroller | RP2350 (Raspberry Pi Pico 2 reference board) |
 | Firmware framework | CircuitPython 10.x |
-| Protocol version | v1.1 (v1.0 baseline frozen 2026-03-15) |
+| Wire protocol | epoch 1 (frozen envelope 2026-03-15; opcodes additive) |
 | USB interfaces | HID (keyboard + mouse) + CDC (console + data) |
 | CDC baud rate | 115200 (data channel) |
 
@@ -271,11 +272,14 @@ clawtouch-hid/
   HID reports. All decisions — what to type, when to click, how to pace
   multi-step actions — live on the host. This keeps the firmware tiny,
   auditable, and reusable across different host stacks.
-* **The protocol is additive.** v1.0 baseline was published 2026-03-15
-  and is byte-level frozen forever; v1.1 (2026-05-28) added drag opcodes
-  without changing v1.0. New capabilities continue to arrive as new
-  command codes inside the same envelope. Existing v1.0 commands keep
-  working forever.
+* **The protocol is additive — one frozen epoch.** The wire format is
+  **epoch 1**: the frame envelope was published 2026-03-15 and is
+  byte-level frozen forever. New capabilities arrive as new command codes
+  inside the same envelope (the drag opcodes, added 2026-05-28, are an
+  epoch-1 addition); the epoch bumps only on a breaking envelope change —
+  by design, almost never. Existing commands keep working forever. The
+  epoch is **not** SemVer; the `clawtouch_hid_protocol` package that
+  describes it is (see [docs/protocol-v1.md](docs/protocol-v1.md)).
 * **Protocol-by-value, not protocol-by-name.** The firmware, the
   `clawtouch_hid_protocol` module, and the protocol spec each list the
   command codes independently. The numbers are the source of truth; the

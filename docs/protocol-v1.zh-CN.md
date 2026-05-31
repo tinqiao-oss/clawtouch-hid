@@ -1,11 +1,17 @@
 [English](protocol-v1.md) | **简体中文**
 
-# ClawTouch HID 通信协议 v1.1
+# ClawTouch HID 通信协议 — Epoch 1(纪元 1)
 
-> **状态:** v1.1 — 在 v1.0 冻结基线上**累加**
-> **v1.0 冻结日期:** 2026-03-15(已冻结的指令永远字节级稳定)
-> **v1.1 新增:** 2026-05-28(`MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` 独立按下/松开
-> 鼠标按键,用于拖拽手势 + 兼容 Anthropic Computer Use)
+> **线协议纪元 (epoch):** `1` — 即 §2 的帧信封, 2026-03-15 冻结. epoch 是单个
+> 整数, **只**在"破坏帧信封 / 改既有 opcode 语义"时才 +1(设计上几乎不动). 新增
+> opcode 是**纪元内的加法**, 永不升 epoch.
+> **不用 SemVer.** 线协议靠 epoch 标识, 不是 `major.minor.patch`. 带 SemVer 的是
+> *描述本 epoch* 的 `clawtouch-hid-protocol` Python 包(现 `1.1.1`), 以及单独的固件
+> (现 `1.1.2`)—— epoch 跟这两个包版本都不是一回事. 历史文档里写的"协议 v1.0 / v1.1"
+> 应理解为 epoch 1 内的 **opcode 集里程碑**(模块发布), 不是"线协议第 1.1 版".
+> **epoch 1 内的 opcode 集历史:** 基线 opcode 2026-03-15 冻结;
+> `MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP`(`0x13` / `0x14`)2026-05-28 累加,
+> 用于拖拽手势 + 兼容 Anthropic Computer Use.
 > **适用范围:** 宿主(PC)↔ ClawTouch HID 设备(Raspberry Pi Pico 2)
 
 ---
