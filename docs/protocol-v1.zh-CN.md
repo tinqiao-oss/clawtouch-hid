@@ -139,6 +139,12 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 与 USB HID 键盘报告布局一致(modifier 字节在前)。三处参考实现
 (固件、`clawtouch_hid_protocol`、本规范)一致。
 
+> **KEY_TYPE_STRING 是 US 布局的逐字符键入, 不是任意 Unicode 文本注入。**
+> payload 是 UTF-8 *传输*, 但固件经 US 键盘布局(`KeyboardLayoutUS`)逐字符
+> 键入。ASCII / US 布局字符可以; 中文、emoji 及其它 US 布局外的字符一般
+> **打不出来** —— 取决于宿主当前输入法, 可能失败或什么都不出。非 ASCII
+> 文本请在宿主层走输入法或剪贴板方案。
+
 ### 3.4 Modifier 位掩码
 
 | Bit  | 修饰键        | 值     |

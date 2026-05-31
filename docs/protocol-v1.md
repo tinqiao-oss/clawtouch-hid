@@ -152,6 +152,14 @@ All three keyboard commands share the same payload byte order —
 (modifier byte first). All reference implementations (firmware,
 `clawtouch_hid_protocol`, this spec) agree.
 
+> **KEY_TYPE_STRING is US-layout character entry, not arbitrary Unicode
+> input.** The payload is UTF-8 *transport*, but the firmware types each
+> character through the US keyboard layout (`KeyboardLayoutUS`). ASCII /
+> US-layout characters work; CJK, emoji, and other characters outside the
+> US layout generally do **not** type correctly — they depend on the host's
+> active IME and may fail or produce nothing. For non-ASCII text, drive the
+> host IME or a clipboard path from the host layer instead.
+
 ### 3.4 Modifier bitmask
 
 | Bit  | Modifier      | Value  |

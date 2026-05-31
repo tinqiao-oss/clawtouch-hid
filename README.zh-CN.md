@@ -8,7 +8,7 @@
 > 这块板子用的 Python 协议模块。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](docs/protocol-v1.zh-CN.md)
+[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
@@ -32,8 +32,8 @@ HID 设备"—— 一台 USB 接入的键鼠,可以让另一台 PC 上跑的程�
    定义了 v1.1 通信协议(命令码、payload 格式、构帧 helper; v1.0 baseline
    2026-03-15 冻结, v1.1 累加)。如果你想跳过 MCP 直接驱动板子,
    从这个模块开始。
-3. **`docs/`** —— [v1.1 协议规范](docs/protocol-v1.zh-CN.md) (v1.0 baseline
-   冻结, v1.1 累加) 和 [烧录指南](docs/flash-guide.zh-CN.md)。
+3. **`docs/`** —— [v1.1 协议规范](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md) (v1.0 baseline
+   冻结, v1.1 累加) 和 [烧录指南](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.zh-CN.md)。
 
 这块板子也是 [clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)
 MCP server 跟它对话的硬件。如果你只想"让 Claude Desktop 控制真实键鼠",
@@ -130,7 +130,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 
 ## 快速上手
 
-1. **给 Pico 2 烧 CircuitPython** —— 见 [docs/flash-guide.zh-CN.md](docs/flash-guide.zh-CN.md)
+1. **给 Pico 2 烧 CircuitPython** —— 见 [docs/flash-guide.zh-CN.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.zh-CN.md)
    的三步流程(按 `BOOTSEL` → 拖入 UF2 → 拖入固件)。
 2. **从 Python 跟它对话** —— 装宿主端协议模块,发一条 `PING`:
 
@@ -152,7 +152,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
    —— 同样的固件、同样的硬件,但暴露为 Model Context Protocol server,
    可直接插入 Claude Desktop / Cline / Continue / OpenClaw / Hermes 等。
 
-完整可运行的 PING 示例见 [`examples/ping_test.py`](examples/ping_test.py)。
+完整可运行的 PING 示例见 [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py)。
 
 ## 通信协议速览
 
@@ -170,7 +170,7 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
 定义了 15 个命令码:`PING/PONG`、`MOUSE_MOVE/CLICK/SCROLL/BUTTON_DOWN/BUTTON_UP`、
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`、`STATUS_REQUEST/RESPONSE`,
 外加 `ACK` 和 `ERROR`。完整字节级布局见
-[docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md)。
+[docs/protocol-v1.zh-CN.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md)。
 
 ## 实际效果
 
@@ -213,8 +213,8 @@ $ python
 ```
 
 完整的帧格式和 15 个命令码见
-[docs/protocol-v1.zh-CN.md](docs/protocol-v1.zh-CN.md); 可运行的
-冒烟示例在 [`examples/ping_test.py`](examples/ping_test.py)。
+[docs/protocol-v1.zh-CN.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md); 可运行的
+冒烟示例在 [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py)。
 
 ## 仓库布局
 

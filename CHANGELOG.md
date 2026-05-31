@@ -49,6 +49,15 @@ separately on each release.
   PID whitelist was a dead `or p.pid is not None` short-circuit);
   `examples/drag_test.py` resyncs the input buffer after the drag glide.
 
+### Fixed — codex cross-check follow-up
+
+- protocol-v1 spec now states that `KEY_TYPE_STRING` is US-layout character
+  entry (UTF-8 transport via `KeyboardLayoutUS`), not arbitrary Unicode
+  input — CJK / emoji depend on the host IME and generally will not type.
+- PyPI-facing relative links to `docs/` and `examples/` in the README
+  (pruned from the sdist) are now absolute GitHub URLs so they resolve on
+  the PyPI project page. Added a `Documentation` project URL.
+
 ## [1.1.2] — 2026-05-31 — Panic-stop releases mouse buttons (firmware fix)
 
 ### Fixed — firmware

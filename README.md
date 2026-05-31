@@ -8,7 +8,7 @@
 > drive the board directly.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](docs/protocol-v1.md)
+[![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
@@ -35,9 +35,9 @@ external program (running on your PC) can drive over a serial command channel:
    module is its SemVer-versioned description (the drag opcodes were added
    additively within epoch 1). Use it from your own host program to talk to
    the board directly without going through MCP or any other layer.
-3. **`docs/`** — the [wire protocol specification](docs/protocol-v1.md)
+3. **`docs/`** — the [wire protocol specification](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md)
    (epoch 1 — frozen envelope, opcodes additive) and a step-by-step
-   [flash guide](docs/flash-guide.md).
+   [flash guide](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.md).
 
 The board is also the hardware that the [clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)
 MCP server talks to. If all you want is "let Claude Desktop drive a real
@@ -158,7 +158,7 @@ hardware-level open source path.
 
 ## Quick start
 
-1. **Flash the Pico 2 with CircuitPython** — see [docs/flash-guide.md](docs/flash-guide.md)
+1. **Flash the Pico 2 with CircuitPython** — see [docs/flash-guide.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.md)
    for the three-step procedure (`BOOTSEL` → drop UF2 → drop firmware).
 2. **Talk to it from Python** — install the host-side protocol module and
    send a `PING`:
@@ -182,7 +182,7 @@ hardware-level open source path.
    server that plugs straight into Claude Desktop / Cline / Continue /
    OpenClaw / Hermes.
 
-A complete, runnable PING example lives at [`examples/ping_test.py`](examples/ping_test.py).
+A complete, runnable PING example lives at [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py).
 
 ## Wire protocol at a glance
 
@@ -199,7 +199,7 @@ A complete, runnable PING example lives at [`examples/ping_test.py`](examples/pi
 
 Fifteen command codes are defined: `PING/PONG`, `MOUSE_MOVE/CLICK/SCROLL/BUTTON_DOWN/BUTTON_UP`,
 `KEY_PRESS/RELEASE/TYPE_STRING/COMBO`, `STATUS_REQUEST/RESPONSE`, plus
-`ACK` and `ERROR`. Full byte-level layout in [docs/protocol-v1.md](docs/protocol-v1.md).
+`ACK` and `ERROR`. Full byte-level layout in [docs/protocol-v1.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md).
 
 ## See it in action
 
@@ -245,8 +245,8 @@ $ python
 ```
 
 The full frame format and all 15 command opcodes are in
-[docs/protocol-v1.md](docs/protocol-v1.md); a runnable smoke test
-lives in [`examples/ping_test.py`](examples/ping_test.py).
+[docs/protocol-v1.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md); a runnable smoke test
+lives in [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py).
 
 ## Repository layout
 
@@ -279,7 +279,7 @@ clawtouch-hid/
   epoch-1 addition); the epoch bumps only on a breaking envelope change —
   by design, almost never. Existing commands keep working forever. The
   epoch is **not** SemVer; the `clawtouch_hid_protocol` package that
-  describes it is (see [docs/protocol-v1.md](docs/protocol-v1.md)).
+  describes it is (see [docs/protocol-v1.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md)).
 * **Protocol-by-value, not protocol-by-name.** The firmware, the
   `clawtouch_hid_protocol` module, and the protocol spec each list the
   command codes independently. The numbers are the source of truth; the
