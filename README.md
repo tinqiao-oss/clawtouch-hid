@@ -117,9 +117,10 @@ A complete, runnable PING example lives at [`examples/ping_test.py`](https://git
 
 You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
 electronics retailers), flash this firmware, and you have a working
-ClawTouch HID device. The turnkey commercial version with a finished
-enclosure is a separate product; this repository targets the
-hardware-level open source path.
+ClawTouch HID device. Prefer not to flash it yourself? Pre-flashed,
+enclosed kits are a separate commercial product — see
+[clawtouch.cn](https://clawtouch.cn). The wire protocol is identical
+either way; this repository targets the hardware-level open source path.
 
 ## Wire protocol at a glance
 
