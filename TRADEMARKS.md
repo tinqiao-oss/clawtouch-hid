@@ -14,7 +14,7 @@ The following marks are owned by **Tinqiao Technology (Beijing) Co.,
 Ltd.** and may not be used to imply endorsement, sponsorship, or
 affiliation without prior written permission:
 
-- **ClawTouch**™ / **ClawTouch**® (where registered)
+- **ClawTouch**™
 - **Tinqiao**™ / **亭桥**™ (corporate name marks)
 
 The `clawtouch-` PyPI / GitHub namespace and the `tinqiao-oss` GitHub
@@ -62,7 +62,7 @@ Tinqiao Technology and the trademark owner.
 | **Cline™** | Cline contributors | README (downstream use example) |
 | **Continue™** | Continue Dev, Inc. | README (downstream use example) |
 | **OpenClaw™** | OpenClaw project | README (downstream use example) |
-| **Hermes Agent™** | Nous Research | README (downstream use example) |
+| **Hermes Agent™** | Nous Research, Inc. | README (downstream use example) |
 | **USB™** | USB Implementers Forum, Inc. | README, docs/protocol-v1.md (interface standard) |
 | **Windows™**, **macOS™**, **Linux™** | Microsoft / Apple / Linus Torvalds | README (target host platforms) |
 
@@ -119,7 +119,7 @@ OEM partnership, or a marketing material:
 以下标志归 **北京亭桥科技有限公司** (Tinqiao Technology (Beijing)
 Co., Ltd.) 所有, **未经书面许可不得用于暗示赞助、推荐或关联关系**:
 
-- **ClawTouch**™ / **ClawTouch**® (已注册地区)
+- **ClawTouch**™
 - **Tinqiao**™ / **亭桥**™ (企业名称商标)
 
 `clawtouch-` 这一 PyPI / GitHub 命名空间和 `tinqiao-oss` GitHub
@@ -155,7 +155,7 @@ LICENSE 和 NOTICE 完整地分发本仓库的副本, 不受本声明限制。
 | **Cline™** | Cline 贡献者 | README (下游使用示例) |
 | **Continue™** | Continue Dev, Inc. | README (下游使用示例) |
 | **OpenClaw™** | OpenClaw 项目 | README (下游使用示例) |
-| **Hermes Agent™** | Nous Research | README (下游使用示例) |
+| **Hermes Agent™** | Nous Research, Inc. | README (下游使用示例) |
 | **USB™** | USB Implementers Forum, Inc. | README、docs/protocol-v1.md (接口标准) |
 | **Windows™** / **macOS™** / **Linux™** | Microsoft / Apple / Linus Torvalds | README (目标宿主平台) |
 
