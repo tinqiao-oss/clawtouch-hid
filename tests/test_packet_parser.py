@@ -15,7 +15,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "firmware"))
 
-from packet_parser import HEADER, MAX_PAYLOAD_LEN, PacketParser  # noqa: E402
+from packet_parser import HEADER, PacketParser  # noqa: E402
 
 
 def _frame(cmd: int, payload: bytes, seq: int = 0) -> bytes:
