@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: clawtouch-hid
+abstract: >-
+  Open USB-CDC HID firmware and a byte-level frozen wire protocol for the
+  ClawTouch hardware: a Raspberry Pi Pico 2 that turns framed serial commands
+  into standard USB HID keyboard and mouse reports. Includes the canonical
+  clawtouch-hid-protocol Python package.
+type: software
+authors:
+  - name: "Tinqiao Technology (Beijing) Co., Ltd."
+    website: "https://clawtouch.cn"
+repository-code: "https://github.com/tinqiao-oss/clawtouch-hid"
+url: "https://github.com/tinqiao-oss/clawtouch-hid"
+license: MIT
+keywords:
+  - HID
+  - USB-CDC
+  - CircuitPython
+  - wire-protocol
+  - RP2350
+  - automation
