@@ -42,7 +42,7 @@ Please include:
 - Whether you intend to publish a CVE / blog post and your preferred
   disclosure timeline.
 
-We'll acknowledge within **3 business days**.
+We'll aim to acknowledge promptly.
 
 ## What is NOT in scope
 

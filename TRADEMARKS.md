@@ -49,7 +49,7 @@ We reference the following third-party trademarks **only for
 descriptive, nominative purposes** (i.e. to identify the hardware
 and software environments this firmware targets). Each mark is the
 property of its respective owner. Our use is consistent with the
-**nominative fair use** doctrine (PRC Trademark Law Art. 59; U.S.
+**nominative fair use** doctrine (U.S.
 *New Kids on the Block* test) and does **not** imply any endorsement,
 sponsorship, partnership, certification, or affiliation between
 Tinqiao Technology and the trademark owner.
@@ -144,7 +144,7 @@ LICENSE 和 NOTICE 完整地分发本仓库的副本, 不受本声明限制。
 
 本仓库**仅出于描述性、指示性目的**引用以下第三方商标 (即标识本
 固件目标的硬件和软件环境)。每个商标均为其权利人合法所有。本仓库
-的使用方式符合**指示性合理使用** (《商标法》§59) 原则, **不**
+的使用方式符合**指示性合理使用**原则, **不**
 暗示亭桥科技与商标权利人之间存在赞助、推荐、合作、认证或关联关系:
 
 | 商标 | 权利人 | 出现位置 |
