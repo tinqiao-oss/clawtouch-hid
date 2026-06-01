@@ -61,6 +61,12 @@ is a standard USB HID class device, recognized natively by every OS).
 The firmware in this repository is the smallest amount of code that
 turns a $8 Pico 2 into exactly that kind of peripheral.
 
+**Local mode — agent and the controlled screen on the same PC — is the common
+case**, and there the real HID path plus zero driver on the input side is the
+whole point. Cross-host control (the agent on one machine driving a target on
+another over USB HID) is an *additional* capability the same hardware unlocks,
+not what this repo is built around.
+
 > ⚠️ This repo covers the **input side only**: protocol frames → HID
 > reports. Visual feedback (the agent reading the screen) is out of
 > scope — in local mode it captures the agent's own screen; in
@@ -69,94 +75,9 @@ turns a $8 Pico 2 into exactly that kind of peripheral.
 > section in [`clawtouch-mcp`](https://github.com/tinqiao-oss/clawtouch-mcp)
 > README for the full breakdown.
 
-## Scope — one device, one target
-
-The hardware is a USB peripheral with a single host connection. The
-firmware in this repo is the same — one Pico, one target machine.
-That's by design. This is a **tethered control device, not a fleet
-automation tool**. If you want to drive ten machines you flash ten
-Picos.
-
-Suitable for: RPA / automated testing of devices you can't install
-software on, accessibility tooling (AI agent + HID = real keyboard
-for a user who can't use a regular one), cross-machine workflows
-where the target machine must stay clean.
-
-Not suitable for: mass account creation or multi-account operations on
-consumer platforms (a single-host peripheral is the wrong shape; users
-are responsible for applicable laws and platform policies), or
-application-specific scripted shortcut layers (those belong in agent /
-RPA frameworks built on top of this primitive layer).
-
-## Acceptable use
-
-This firmware translates host-issued protocol frames into HID
-reports. This project does **not** support, document, or assist
-with use cases that:
-
-- Bypass, evade, or interfere with any target platform's anti-fraud,
-  anti-abuse, rate-limiting, or risk-control measures.
-- Operate accounts the user does not lawfully own or have explicit
-  authorization to operate.
-- Are prohibited by the target application's Terms of Service in
-  the user's jurisdiction.
-- Violate applicable law — including, but not limited to, PRC
-  *Anti-Unfair Competition Law* Art. 13 (the Internet sector
-  specific provision; promulgated 2025-06-27, effective
-  2025-10-15) covering improper means — including circumventing
-  technical management measures — to acquire or use another
-  operator's data; *Personal Information Protection Law*;
-  *Cybersecurity Law*; and equivalent laws in other jurisdictions.
-
-These statements describe the scope of our maintainer support and
-documentation — they are **not** additional restrictions on the
-MIT License, which continues to govern all use, modification, and
-redistribution of the source code. Users are independently
-responsible for evaluating their specific use case against
-applicable laws and the target platform's ToS.
-
-This repository contains no AI / ML model and generates no text,
-image, audio, or video content. Content-generation obligations
-(e.g. PRC *AI Generated Content Labeling Measure* effective
-2025-09-01) attach to whatever upstream agent drives this firmware,
-not to the firmware itself.
-
-## Autonomy & safety
-
-The firmware is a generic HID executor: it faithfully turns whatever
-frames the host sends into HID reports, with no on-device guardrail and
-no inspection of intent. The properties this README sells as features —
-input that the OS treats like a physical keyboard/mouse, and "all
-decisions live on the host" — have a symmetric consequence: an
-autonomous agent driving the board has, in practice, the same reach
-over the target as a person at the keyboard, and that can happen against
-the user's intent via prompt injection, model error, or over-broad
-autonomy.
-
-This is an agent-behavior / deployment risk, not a firmware bug (see
-[SECURITY.md](SECURITY.md)). For the full risk disclosure and the
-operator mitigations (dedicated/least-privilege host, human-in-the-loop,
-network isolation, panic stop, treating screen content as untrusted),
-see the **Autonomy & safety** section in the
-[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md).
-
-## Hardware
-
-| Item | Spec |
-|------|------|
-| Microcontroller | RP2350 (Raspberry Pi Pico 2 reference board) |
-| Firmware framework | CircuitPython 10.x |
-| Wire protocol | epoch 1 (frozen envelope 2026-03-15; opcodes additive) |
-| USB interfaces | HID (keyboard + mouse) + CDC (console + data) + USB mass storage (`CIRCUITPY` drive, dev firmware — see note below) |
-| CDC baud rate | 115200 (data channel) |
-
-You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
-electronics retailers), flash this firmware, and you have a working
-ClawTouch HID device. The turnkey commercial version with a finished
-enclosure is a separate product; this repository targets the
-hardware-level open source path.
-
 ## Quick start
+
+> ⚠️ This lets an agent drive a real keyboard / mouse — read [Safety](#safety) first.
 
 1. **Flash the Pico 2 with CircuitPython** — see [docs/flash-guide.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.md)
    for the three-step procedure (`BOOTSEL` → drop UF2 → drop firmware).
@@ -183,6 +104,22 @@ hardware-level open source path.
    OpenClaw / Hermes.
 
 A complete, runnable PING example lives at [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py).
+
+## Hardware
+
+| Item | Spec |
+|------|------|
+| Microcontroller | RP2350 (Raspberry Pi Pico 2 reference board) |
+| Firmware framework | CircuitPython 10.x |
+| Wire protocol | epoch 1 (frozen envelope 2026-03-15; opcodes additive) |
+| USB interfaces | HID (keyboard + mouse) + CDC (console + data) + USB mass storage (`CIRCUITPY` drive, dev firmware) |
+| CDC baud rate | 115200 (data channel) |
+
+You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
+electronics retailers), flash this firmware, and you have a working
+ClawTouch HID device. The turnkey commercial version with a finished
+enclosure is a separate product; this repository targets the
+hardware-level open source path.
 
 ## Wire protocol at a glance
 
@@ -248,6 +185,77 @@ The full frame format and all 15 command opcodes are in
 [docs/protocol-v1.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md); a runnable smoke test
 lives in [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py).
 
+## Safety
+
+The firmware is a generic HID executor: it faithfully turns whatever
+frames the host sends into HID reports, with no on-device guardrail and
+no inspection of intent. The properties this README sells as features —
+input that the OS treats like a physical keyboard/mouse, and "all
+decisions live on the host" — have a symmetric consequence: an
+autonomous agent driving the board has, in practice, the same reach
+over the target as a person at the keyboard, and that can happen against
+the user's intent via prompt injection, model error, or over-broad
+autonomy.
+
+This is an agent-behavior / deployment risk, not a firmware bug (see
+[SECURITY.md](SECURITY.md)). For the full risk disclosure and the
+operator mitigations (dedicated/least-privilege host, human-in-the-loop,
+network isolation, panic stop, treating screen content as untrusted),
+see the **Safety** section in the
+[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md).
+
+## Scope — one device, one target
+
+The hardware is a USB peripheral with a single host connection. The
+firmware in this repo is the same — one Pico, one target machine.
+That's by design. This is a **tethered control device, not a fleet
+automation tool**. If you want to drive ten machines you flash ten
+Picos.
+
+Suitable for: RPA / automated testing of devices you can't install
+software on, accessibility tooling (AI agent + HID = real keyboard
+for a user who can't use a regular one), cross-machine workflows
+where the target machine must stay clean.
+
+Not suitable for: mass account creation or multi-account operations on
+consumer platforms (a single-host peripheral is the wrong shape; users
+are responsible for applicable laws and platform policies), or
+application-specific scripted shortcut layers (those belong in agent /
+RPA frameworks built on top of this primitive layer).
+
+## Acceptable use
+
+This firmware translates host-issued protocol frames into HID
+reports. This project does **not** support, document, or assist
+with use cases that:
+
+- Bypass, evade, or interfere with any target platform's anti-fraud,
+  anti-abuse, rate-limiting, or risk-control measures.
+- Operate accounts the user does not lawfully own or have explicit
+  authorization to operate.
+- Are prohibited by the target application's Terms of Service in
+  the user's jurisdiction.
+- Violate applicable law — including, but not limited to, PRC
+  *Anti-Unfair Competition Law* Art. 13 (the Internet sector
+  specific provision; promulgated 2025-06-27, effective
+  2025-10-15) covering improper means — including circumventing
+  technical management measures — to acquire or use another
+  operator's data; *Personal Information Protection Law*;
+  *Cybersecurity Law*; and equivalent laws in other jurisdictions.
+
+These statements describe the scope of our maintainer support and
+documentation — they are **not** additional restrictions on the
+MIT License, which continues to govern all use, modification, and
+redistribution of the source code. Users are independently
+responsible for evaluating their specific use case against
+applicable laws and the target platform's ToS.
+
+This repository contains no AI / ML model and generates no text,
+image, audio, or video content. Content-generation obligations
+(e.g. PRC *AI Generated Content Labeling Measure* effective
+2025-09-01) attach to whatever upstream agent drives this firmware,
+not to the firmware itself.
+
 ## Repository layout
 
 ```
@@ -286,19 +294,6 @@ clawtouch-hid/
   command codes independently. The numbers are the source of truth; the
   Python names exist for readability only.
 
-## Open source roadmap
-
-ClawTouch follows an **open-core** model: hardware and protocol primitives
-are open, the integrated commercial product stays closed.
-
-| Component                                              | Status                   |
-|--------------------------------------------------------|--------------------------|
-| **clawtouch-hid** (this repo: firmware + protocol)     | ✅ Released              |
-| **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ Released |
-| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (markdown skill files for LLM agents) | ✅ Released |
-| **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
-| Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
-
 ## Related work
 
 ClawTouch is not the first project to put HID hardware between an
@@ -317,17 +312,24 @@ agent and a target PC. The closest neighbors:
   (v1.0 baseline frozen, v1.1 additive), so new opcodes are additive
   across hosts and the firmware stays auditable.
 * **[HIDAgent](https://arxiv.org/abs/2602.00492)** — Bigham et al.
-  (CMU, 2026-01). A < $30 Raspberry Pi Pico + CircuitPython research
-  toolkit for UI agents driving HID-compatible devices. The closest
-  peer in hardware budget and design intent; ships a Python library
-  rather than a versioned wire protocol + MCP server + skill catalog.
+  (CMU, 2026-01). A < $30 RP2040 + HDMI-to-USB + CH340 serial bridge
+  research toolkit for UI agents driving HID-compatible devices. The
+  closest peer in hardware budget and design intent; ships a Python
+  library rather than a versioned wire protocol + MCP server + skill
+  catalog.
 
-If your target is the *same* machine the agent runs on,
-[`AB498/computer-control-mcp`](https://github.com/AB498/computer-control-mcp),
+ClawTouch's irreplaceable edge is the **genuine hardware HID path**: the OS
+sees a real physical keyboard / mouse, and this repo is the firmware + frozen
+wire protocol that produces it. In local mode — the common case — that real
+HID plus zero driver on the input side is exactly what makes it work for
+accessibility, compatibility testing, and apps that reject synthetic input; if
+your target is the *same* machine the agent runs on and the app doesn't care
+where input comes from, [`AB498/computer-control-mcp`](https://github.com/AB498/computer-control-mcp),
 [`domdomegg/computer-use-mcp`](https://github.com/domdomegg/computer-use-mcp),
-or the various `mcp-pyautogui` implementations will be simpler — they
-call PyAutoGUI in-process. ClawTouch is for the cross-device case where
-the agent and the target are different machines.
+or the various `mcp-pyautogui` implementations will be simpler — they call
+PyAutoGUI in-process. Cross-host control — the agent on one machine driving a
+target on another — is an *additional* capability the same hardware unlocks,
+something a software-only path can't do at all.
 
 ## FAQ
 
@@ -356,12 +358,23 @@ without adopting the whole ClawTouch product. The closed-source
 desktop product is a separate agent that runs on top of the same
 hardware; contact `support@tinqiao.com` for details.
 
-## Contributing
+## Open source roadmap, contributing & license
+
+**Open-core model.** Hardware and protocol primitives are open; the integrated commercial product stays closed.
+
+| Component                                              | Status                   |
+|--------------------------------------------------------|--------------------------|
+| **clawtouch-hid** (this repo: firmware + protocol)     | ✅ Released              |
+| **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ Released |
+| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (markdown skill files for LLM agents) | ✅ Released |
+| **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
+| Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
+
+### Contributing
 
 PRs are welcome for: documentation fixes, additional examples, new client
 language bindings against the v1.1 protocol (v1.0 baseline still works),
-English translations,
-hardware compatibility reports.
+English translations, hardware compatibility reports.
 
 We're _not_ taking PRs for: agent-loop logic or application-level
 features (intentionally out of scope — firmware translates frames to
@@ -369,15 +382,7 @@ HID reports, nothing else), protocol changes that break v1.0
 compatibility, or application-specific adapters (those live in the
 closed-source desktop app).
 
-## About
-
-`clawtouch-hid` is maintained by **Tinqiao Technology** — the team behind
-**ClawTouch** ([clawtouch.cn](https://clawtouch.cn)), building plug-in USB
-devices that let AI agents operate real Windows / macOS / Linux desktops
-at the HID layer. This repository is the open, hardware-layer slice of
-that stack.
-
-## License
+### License
 
 MIT © Tinqiao Technology (Beijing) Co., Ltd. — see [LICENSE](LICENSE)
 (English, authoritative) and [LICENSE.zh-CN.md](LICENSE.zh-CN.md)
@@ -392,3 +397,11 @@ any trademark rights.
 
 For commercial deployments at scale, enterprise support, or OEM hardware
 discussion: `support@tinqiao.com`.
+
+## About
+
+`clawtouch-hid` is maintained by **Tinqiao Technology** — the team behind
+**ClawTouch** ([clawtouch.cn](https://clawtouch.cn)), building plug-in USB
+devices that let AI agents operate real Windows / macOS / Linux desktops
+at the HID layer. This repository is the open, hardware-layer slice of
+that stack.

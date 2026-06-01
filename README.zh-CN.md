@@ -45,13 +45,18 @@ MCP server 跟它对话的硬件。如果你只想"让 Claude Desktop 控制真�
 
 ## 为啥要用物理 HID 设备?
 
-大部分"AI 控制电脑"的 demo 都要求在目标机上跑 agent 进程,并走 OS 层
-合成输入 API。这类路径在 kiosk 锁机环境、嵌入式测试台架、跨设备 RPA
-等"目标机 HID 输入侧必须保持干净"的场景里有局限。USB HID 物理外设走
-标准 OS HID 驱动栈,跟任何插上的键盘鼠标走同一条数据通路 —— 目标机
+大部分"AI 控制电脑"的 demo 都跑在沙箱里,或走 OS 层合成输入 API。
+这类路径在 kiosk 锁机环境、嵌入式测试台架、跨设备 RPA 等"目标机
+HID 输入侧必须保持干净"的场景里有局限。USB HID 物理外设走标准
+OS HID 驱动栈,跟任何插上的键盘鼠标走同一条数据通路 —— 目标机
 不需要安装任何鼠标键盘驱动或 HID agent 进程, Pico 是 standard USB HID
 class, OS 原生识别。本仓库里的固件就是把一块 ¥55 的 Pico 2 变成这种
 外设需要的最少代码。
+
+**本机模式 —— agent 和被控屏幕在同一台 PC —— 是常见场景**, 这种场景下
+真实 HID 通路 + 输入侧零驱动正是关键。跨机控制 (agent 在一台机上经
+USB HID 驱动另一台目标机) 是同一块硬件解锁的**附加**能力, 而非本仓库
+的主轴。
 
 > ⚠️ 本仓库只覆盖**输入侧**: 协议帧 → HID 报告。视觉反馈 (agent 看屏)
 > 不在本仓库范围 —— 本机模式下抓 agent 所在机的屏即可, 跨机模式下需要
@@ -59,76 +64,9 @@ class, OS 原生识别。本仓库里的固件就是把一块 ¥55 的 Pico 2 �
 > [`clawtouch-mcp`](https://github.com/tinqiao-oss/clawtouch-mcp) README
 > 「部署模式」一节。
 
-## 适用范围 —— 一台设备只对应一个目标
-
-硬件是 USB 外设,只有单一宿主连接。本仓库里的固件也是 —— 一块 Pico
-对应一台目标机。这是设计本身决定的:**单设备单宿主的对位控制硬件**,
-要控 10 台机器就烧 10 块 Pico。
-
-**适合**: RPA / 装不了软件的设备自动化测试 / 无障碍辅助 (AI agent +
-HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干净不装 agent)。
-
-**不适合**: 批量账号注册 / 消费平台多账号运营 (单设备单宿主结构上
-就不合, 用户需自行检查适用法律和平台规则) / 针对特定应用的脚本化
-适配层 (选择器、固定流程脚本 —— 这些该在上层 agent / RPA 框架做,
-本仓库只做底层 HID 原语)。
-
-## 可接受用途
-
-本固件把宿主发来的协议帧翻译成 HID 报告。本项目**不支持、不文
-档化、不协助**以下用例:
-
-- 规避、绕过或干扰任何目标平台的反作弊、反滥用、限速、风控等
-  技术管理措施。
-- 操作用户自身不合法拥有或未获显式授权操作的账户。
-- 目标应用服务条款 (ToS) 在用户所在司法辖区禁止的活动。
-- 违反适用法律的活动 —— 包括但不限于《反不正当竞争法》§13
-  (互联网专条, 2025-06-27 修订通过, 2025-10-15 起施行) 所指
-  "以欺诈、胁迫、避开或者破坏技术管理措施等不正当手段获取、
-  使用其他经营者合法持有的数据" 等情形; 《个人信息保护法》;
-  《网络安全法》; 及其他司法辖区的等效法律。
-
-以上仅为本项目维护者的支持与文档范围声明, **并非**在 MIT 协议之
-外对源代码的使用、修改或再分发施加额外限制 —— 源代码本身的使用、
-修改和再分发仍完全受 MIT 协议规约。用户应**独立判断**自己具体用
-例是否符合适用法律和目标平台的 ToS。
-
-本仓库**不含**任何 AI / ML 模型, 也不生成文本、图片、音频、视频
-内容。内容生成相关的合规义务 (例如《人工智能生成合成内容标识
-办法》2025-09-01 施行) 由驱动本固件的上层 agent 承担, 不由本
-固件承担。
-
-## 自主与安全
-
-本固件是一个通用 HID 执行器: 它忠实地把宿主发来的任何帧翻译成 HID
-报告, 没有任何板载护栏, 也不检查意图。本 README 作为卖点的那些特性
-—— 操作系统把输入当成物理键鼠、"一切决策都在宿主侧" —— 有一个对称的
-后果: 一个自主 agent 驱动这块板子, 实际上拥有与坐在键盘前的真人**同等
-的**目标机操控范围; 而这可能在用户本意之外发生 —— 经由提示词注入、
-模型错误, 或过宽的自主授权。
-
-这是 **agent 行为 / 部署层面**的风险, 不是固件 bug (见
-[SECURITY.md](SECURITY.md))。完整的风险披露与运维缓解措施 (专用 /
-最小权限宿主、人在回路、网络隔离、紧急停 panic stop、把屏幕内容当作
-不可信输入), 见
-[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md)
-的「自主性与安全」一节。
-
-## 硬件
-
-| 项 | 规格 |
-|------|------|
-| 主控 | RP2350 (Raspberry Pi Pico 2 参考板) |
-| 固件框架 | CircuitPython 10.x |
-| 协议版本 | v1.1 (v1.0 baseline 2026-03-15 冻结) |
-| USB 接口 | HID (键盘 + 鼠标) + CDC (console + data) |
-| CDC 波特率 | 115200 (data 通道) |
-
-你可以用任意 RP2350 板 (例如 Raspberry Pi Pico 2, ¥55 左右从电子件
-零售商可买), 烧上本仓库的固件, 就是一台能用的 ClawTouch HID 设备。
-成品商业版 (带外壳) 是独立产品; 本仓库聚焦硬件层的开源方案。
-
 ## 快速上手
+
+> ⚠️ 这让 agent 能驱动真实键鼠 —— 请先读 [安全](#安全)。
 
 1. **给 Pico 2 烧 CircuitPython** —— 见 [docs/flash-guide.zh-CN.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/flash-guide.zh-CN.md)
    的三步流程(按 `BOOTSEL` → 拖入 UF2 → 拖入固件)。
@@ -153,6 +91,20 @@ HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干�
    可直接插入 Claude Desktop / Cline / Continue / OpenClaw / Hermes 等。
 
 完整可运行的 PING 示例见 [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py)。
+
+## 硬件
+
+| 项 | 规格 |
+|------|------|
+| 主控 | RP2350 (Raspberry Pi Pico 2 参考板) |
+| 固件框架 | CircuitPython 10.x |
+| 协议版本 | v1.1 (v1.0 baseline 2026-03-15 冻结) |
+| USB 接口 | HID (键盘 + 鼠标) + CDC (console + data) + USB 海量存储 (`CIRCUITPY` 盘, dev 固件) |
+| CDC 波特率 | 115200 (data 通道) |
+
+你可以用任意 RP2350 板 (例如 Raspberry Pi Pico 2, ¥55 左右从电子件
+零售商可买), 烧上本仓库的固件, 就是一台能用的 ClawTouch HID 设备。
+成品商业版 (带外壳) 是独立产品; 本仓库聚焦硬件层的开源方案。
 
 ## 通信协议速览
 
@@ -216,13 +168,69 @@ $ python
 [docs/protocol-v1.zh-CN.md](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md); 可运行的
 冒烟示例在 [`examples/ping_test.py`](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/examples/ping_test.py)。
 
+## 安全
+
+本固件是一个通用 HID 执行器: 它忠实地把宿主发来的任何帧翻译成 HID
+报告, 没有任何板载护栏, 也不检查意图。本 README 作为卖点的那些特性
+—— 操作系统把输入当成物理键鼠、"一切决策都在宿主侧" —— 有一个对称的
+后果: 一个自主 agent 驱动这块板子, 实际上拥有与坐在键盘前的真人**同等
+的**目标机操控范围; 而这可能在用户本意之外发生 —— 经由提示词注入、
+模型错误, 或过宽的自主授权。
+
+这是 **agent 行为 / 部署层面**的风险, 不是固件 bug (见
+[SECURITY.md](SECURITY.md))。完整的风险披露与运维缓解措施 (专用 /
+最小权限宿主、人在回路、网络隔离、紧急停 panic stop、把屏幕内容当作
+不可信输入), 见
+[`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md)
+的「安全」一节。
+
+## 适用范围 —— 一台设备只对应一个目标
+
+硬件是 USB 外设,只有单一宿主连接。本仓库里的固件也是 —— 一块 Pico
+对应一台目标机。这是设计本身决定的:**单设备单宿主的对位控制硬件**,
+要控 10 台机器就烧 10 块 Pico。
+
+**适合**: RPA / 装不了软件的设备自动化测试 / 无障碍辅助 (AI agent +
+HID = 残障用户的真实键盘) / 跨机工作流 (目标机必须保持干净不装 agent)。
+
+**不适合**: 批量账号注册 / 消费平台多账号运营 (单设备单宿主结构上
+就不合, 用户需自行检查适用法律和平台规则) / 针对特定应用的脚本化
+适配层 (选择器、固定流程脚本 —— 这些该在上层 agent / RPA 框架做,
+本仓库只做底层 HID 原语)。
+
+## 可接受用途
+
+本固件把宿主发来的协议帧翻译成 HID 报告。本项目**不支持、不文
+档化、不协助**以下用例:
+
+- 规避、绕过或干扰任何目标平台的反作弊、反滥用、限速、风控等
+  技术管理措施。
+- 操作用户自身不合法拥有或未获显式授权操作的账户。
+- 目标应用服务条款 (ToS) 在用户所在司法辖区禁止的活动。
+- 违反适用法律的活动 —— 包括但不限于《反不正当竞争法》§13
+  (互联网专条, 2025-06-27 修订通过, 2025-10-15 起施行) 所指
+  "以欺诈、胁迫、避开或者破坏技术管理措施等不正当手段获取、
+  使用其他经营者合法持有的数据" 等情形; 《个人信息保护法》;
+  《网络安全法》; 及其他司法辖区的等效法律。
+
+以上仅为本项目维护者的支持与文档范围声明, **并非**在 MIT 协议之
+外对源代码的使用、修改或再分发施加额外限制 —— 源代码本身的使用、
+修改和再分发仍完全受 MIT 协议规约。用户应**独立判断**自己具体用
+例是否符合适用法律和目标平台的 ToS。
+
+本仓库**不含**任何 AI / ML 模型, 也不生成文本、图片、音频、视频
+内容。内容生成相关的合规义务 (例如《人工智能生成合成内容标识
+办法》2025-09-01 施行) 由驱动本固件的上层 agent 承担, 不由本
+固件承担。
+
 ## 仓库布局
 
 ```
 clawtouch-hid/
 ├── clawtouch_hid_protocol/   ← Python 协议模块(宿主端,pip 可装)
 ├── firmware/                 ← Pico 2 的 CircuitPython 固件
-│   ├── boot.py               ← USB 描述符设置(上电只跑一次)
+│   ├── boot.py               ← USB 配置 (DEV: HID + CDC console/data + CIRCUITPY 盘)
+│   ├── boot_production.py    ← USB 配置 (锁定版: 仅 HID + CDC data)
 │   ├── code.py               ← HID 执行器主循环
 │   ├── packet_parser.py      ← 帧提取器,无硬件依赖,可在 PC 上测
 │   └── lib/adafruit_hid/     ← 捆绑的 HID 库 (MIT,见 NOTICE)
@@ -245,18 +253,6 @@ clawtouch-hid/
 * **以值为准,不以名为准。** 固件、`clawtouch_hid_protocol` 模块、协议
   spec 三处各列了一份命令码。数值是真理,Python 名称只是为了可读。
 
-## 开源路线图
-
-ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业产品闭源。
-
-| 组件                                              | 状态                  |
-|---------------------------------------------------|-----------------------|
-| **clawtouch-hid** (本仓库:固件 + 协议)           | ✅ 已发布             |
-| **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ 已发布 |
-| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (给 LLM agent 用的 markdown skill 文件) | ✅ 已发布 |
-| **clawtouch-bridge-sdk** (Python + Node SDK)      | 🔵 规划中             |
-| 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
-
 ## 相关工作
 
 ClawTouch 不是第一个在 AI agent 和目标机之间塞 HID 硬件的项目。最相近的几个:
@@ -272,15 +268,20 @@ ClawTouch 不是第一个在 AI agent 和目标机之间塞 HID 硬件的项目�
   改用 Pico 2 + CircuitPython, 走 v1.1 线协议 (v1.0 baseline 冻结, v1.1 累加), 新增 opcode 对老宿主
   向前兼容, 固件本身可审计可改。
 * **[HIDAgent](https://arxiv.org/abs/2602.00492)** —— CMU 的 Bigham 等人,
-  2026-01 发布。< $30 的 Raspberry Pi Pico + CircuitPython 研究 toolkit,
-  专门让 UI agent 通过物理 HID 驱动目标机。**硬件预算和设计意图上最相近的
+  2026-01 发布。< $30 的 RP2040 + HDMI-to-USB + CH340 串口桥研究 toolkit,
+  专门让 UI agent 通过物理 HID 驱动 HID 兼容设备。**硬件预算和设计意图上最相近的
   学术同行**; 配套是 Python 库, 不带版本化线协议 / MCP server / skill 仓库。
 
-如果你的目标机就是 agent 本机, 用
+ClawTouch 不可替代的优势是**真实硬件 HID 通路**: 操作系统看到的是一台
+真实物理键鼠, 而本仓库正是产出这条通路的固件 + 冻结线协议。在本机模式
+(常见场景) 下, 这条真实 HID 通路 + 输入侧零驱动正是它能服务无障碍、
+兼容性测试、以及拒绝合成输入的应用的关键; 如果你的目标机就是 agent
+本机、应用也不在意输入从哪来, 用
 [`AB498/computer-control-mcp`](https://github.com/AB498/computer-control-mcp)、
 [`domdomegg/computer-use-mcp`](https://github.com/domdomegg/computer-use-mcp) 或
-各种 `mcp-pyautogui` 实现会更轻 —— 它们在进程内调 PyAutoGUI。ClawTouch
-针对的是**跨设备**场景: agent 和目标机不是同一台。
+各种 `mcp-pyautogui` 实现会更轻 —— 它们在进程内调 PyAutoGUI。跨机控制
+(agent 在一台机上驱动另一台目标机) 是同一块硬件解锁的**附加**能力 ——
+这是纯软件路径根本做不到的。
 
 ## 常见问题
 
@@ -304,7 +305,19 @@ CircuitPython 上,因为它在 import 时就依赖板上的 `usb_hid` / `usb_cdc
 能在不绑定 ClawTouch 完整产品的前提下使用硬件。闭源桌面端是跑在同一
 套硬件之上的独立 agent, 邮件咨询 `support@tinqiao.com`。
 
-## 参与贡献
+## 开源路线图、参与贡献与许可
+
+ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业产品闭源。
+
+| 组件                                              | 状态                  |
+|---------------------------------------------------|-----------------------|
+| **clawtouch-hid** (本仓库:固件 + 协议)           | ✅ 已发布             |
+| **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ 已发布 |
+| **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (给 LLM agent 用的 markdown skill 文件) | ✅ 已发布 |
+| **clawtouch-bridge-sdk** (Python + Node HID SDK)  | 🔵 规划中             |
+| 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
+
+### 参与贡献
 
 欢迎 PR:文档修订、新示例、针对 v1.1 协议的新语言绑定 (v1.0 baseline 仍可用)、英文翻译、
 硬件兼容性报告。
@@ -313,14 +326,7 @@ CircuitPython 上,因为它在 import 时就依赖板上的 `usb_hid` / `usb_cdc
 固件只把帧翻译成 HID 报告)、破坏 v1.0 兼容性的协议改动、应用专属
 适配器(这部分在闭源桌面端)。
 
-## 关于项目
-
-`clawtouch-hid` 由 **北京亭桥科技** 维护 —— ClawTouch 产品团队
-([clawtouch.cn](https://clawtouch.cn)),做即插即用的 USB 设备,让 LLM
-agent 在 HID 层操控真实的 Windows / macOS / Linux 桌面。本仓库是
-整个产品栈的开源硬件层。
-
-## License
+### License
 
 MIT © 北京亭桥科技有限公司 — 见 [LICENSE](LICENSE) (英文版, 法定
 依据) 和 [LICENSE.zh-CN.md](LICENSE.zh-CN.md) (非官方中文翻译,
@@ -332,3 +338,10 @@ MIT © 北京亭桥科技有限公司 — 见 [LICENSE](LICENSE) (英文版, 法
 —— MIT 协议**不**授予任何商标权利。
 
 商业部署 / 企业支持 / OEM 硬件合作咨询:`support@tinqiao.com`
+
+## 关于项目
+
+`clawtouch-hid` 由 **北京亭桥科技** 维护 —— ClawTouch 产品团队
+([clawtouch.cn](https://clawtouch.cn)),做即插即用的 USB 设备,让 LLM
+agent 在 HID 层操控真实的 Windows / macOS / Linux 桌面。本仓库是
+整个产品栈的开源硬件层。
