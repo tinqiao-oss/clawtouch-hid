@@ -18,7 +18,8 @@
 1. 从官方下载最新 **CircuitPython 10.x** 的 Pico 2 版 UF2:
    <https://circuitpython.org/board/raspberry_pi_pico2/>
    (最后验证版本: 10.1.4)
-2. 按住 Pico 2 上的 **BOOTSEL** 按钮,然后插上 USB(保持按住)。
+2. 按住 Pico 2 上的 **BOOTSEL** 按钮(板上唯一的按钮; ClawTouch 带壳成品上 =
+   USB-C 口朝上时**左侧**那个),然后插上 USB(保持按住)。
 3. 电脑会出现一个名为 `RPI-RP2` 的 USB 驱动器(内含 `INFO_UF2.TXT`)。
 4. 把下载的 `.uf2` 文件拖入该驱动器。
 5. Pico 2 自动重启,驱动器名变成 `CIRCUITPY`。

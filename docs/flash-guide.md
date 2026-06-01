@@ -21,8 +21,9 @@
    the official site:
    <https://circuitpython.org/board/raspberry_pi_pico2/>
    (last verified version: 10.1.4)
-2. Hold down the **BOOTSEL** button on the Pico 2, then plug in the
-   USB cable while still holding it.
+2. Hold down the **BOOTSEL** button on the Pico 2 (the only push-button on
+   the board; on a ClawTouch cased unit it's the button on the **left** when
+   the USB-C port faces up), then plug in the USB cable while still holding it.
 3. A USB drive named `RPI-RP2` will appear (it contains `INFO_UF2.TXT`).
 4. Drag the downloaded `.uf2` file onto that drive.
 5. The Pico 2 reboots automatically; the drive renames itself to
