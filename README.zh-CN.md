@@ -13,7 +13,7 @@
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 baseline 线协议帧格式 (v1.1 累加新 opcode 但不改帧结构): 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
+  <img src="https://raw.githubusercontent.com/tinqiao-oss/clawtouch-hid/master/docs/assets/hero.png" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 baseline 线协议帧格式 (v1.1 累加新 opcode 但不改帧结构): 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
 </p>
 
 ---

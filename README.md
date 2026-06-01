@@ -13,7 +13,7 @@
 [![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
 
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 baseline wire frame layout is shown on the right (v1.1 adds new opcodes without changing the frame structure): 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
+  <img src="https://raw.githubusercontent.com/tinqiao-oss/clawtouch-hid/master/docs/assets/hero.png" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 baseline wire frame layout is shown on the right (v1.1 adds new opcodes without changing the frame structure): 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
 </p>
 
 ---
