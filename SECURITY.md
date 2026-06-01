@@ -53,7 +53,7 @@ We'll acknowledge within **3 business days**.
   the user didn't intend, that's an agent / prompt issue, not a
   firmware bug — so it is out of scope for *this* vulnerability-
   reporting policy. It is still a real deployment risk: see the
-  **Autonomy & safety** section in this repo's [README](README.md) and
+  **Safety** section in this repo's [README](README.md) and
   the fuller disclosure + operator mitigations in the
   [`clawtouch-mcp` README](https://github.com/tinqiao-oss/clawtouch-mcp/blob/master/README.md).
 
