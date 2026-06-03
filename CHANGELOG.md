@@ -457,8 +457,5 @@ first public bundle shipping it.
 unified to `[modifiers, keycode]` across all three keyboard commands
 in 1.1.1 — see the entry at the top of this file.)
 
-[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.2...HEAD
-[1.1.2]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.1...v1.1.2
-[1.1.1]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.0...v1.1.1
-[1.1.0]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/tinqiao-oss/clawtouch-hid/releases/tag/v1.0.0
+[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/tinqiao-oss/clawtouch-hid/releases/tag/v1.1.1
