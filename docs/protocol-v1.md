@@ -117,6 +117,19 @@ illustrative; query `STATUS_REQUEST` for the live value.
   format so a future firmware revision targeting an HID Digitizer
   profile can switch on it without renumbering opcodes.
 
+**MOUSE_MOVE magnitude:**
+
+- `x` / `y` are signed int16 deltas on the wire (−32768..32767). A USB
+  HID Boot Mouse report, however, carries only a **signed int8 per axis**
+  (−127..127). The firmware passes the int16 delta straight to Adafruit
+  HID's `Mouse.move()`, which **splits any `|delta| > 127` into successive
+  Boot Mouse reports** — so a large delta is delivered in full, just across
+  multiple reports. The firmware does **not** clamp: large deltas are
+  expected (the host converge loop's first hop across a monitor is
+  routinely `> 127` px and depends on this split). Hosts may send any
+  int16-range delta; a value outside int16 is rejected by the host-side
+  encoder (`struct.error`), never reaching the wire.
+
 **MOUSE_CLICK button:**
 
 - `0x01` = LEFT, `0x02` = RIGHT, `0x04` = MIDDLE

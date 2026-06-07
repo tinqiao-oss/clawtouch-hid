@@ -200,6 +200,14 @@ class HidExecutor:
         # is read here so the field stays addressable for a future
         # firmware revision that switches to a HID Digitizer profile.
         del flags  # explicitly unused at the v1.0 firmware layer
+        # x/y are signed int16 deltas (+/-32767), but a USB HID Boot Mouse
+        # report carries only a signed int8 per axis (-127..127). Adafruit
+        # HID's Mouse.move() bridges the gap: it splits any |delta| > 127
+        # into successive Boot Mouse reports, so a large delta is delivered
+        # in full, just across multiple reports. We deliberately do NOT
+        # clamp here -- the host converge loop emits whatever magnitude it
+        # needs (a cross-monitor first hop is routinely > 127 px) and relies
+        # on this split. See docs/protocol-v1.md (MOUSE_MOVE magnitude).
         self.mouse.move(x=x, y=y)
         self._send_ack(seq_id)
 

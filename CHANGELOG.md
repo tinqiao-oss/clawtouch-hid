@@ -11,6 +11,16 @@ separately on each release.
 
 ## [Unreleased] — docs & packaging hygiene (pre-publish sweep)
 
+### Documented — MOUSE_MOVE int16/int8 magnitude contract
+
+- `MOUSE_MOVE` x/y are signed int16 deltas (±32767) on the wire, but a USB
+  HID Boot Mouse report carries only int8 per axis (-127..127). Adafruit
+  HID's `Mouse.move()` splits any `|delta| > 127` into successive reports,
+  so a large delta is delivered in full over multiple reports — the firmware
+  relies on this and never clamps. Documented the range + split contract in
+  the `protocol-v1.md` MOUSE_MOVE section, the `_handle_mouse_move` firmware
+  comment, and `build_mouse_move`'s docstring (previously unstated).
+
 ### Fixed — documentation
 
 - zh-CN README "实际效果" REPL example now runs as written: was calling
