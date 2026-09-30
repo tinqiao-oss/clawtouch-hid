@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
+# SPDX-FileCopyrightText: 2026 Beijing Tinqiao Technology Co., Ltd.
 """ClawTouch HID firmware v1.1.2 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data

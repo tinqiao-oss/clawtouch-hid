@@ -385,7 +385,7 @@ closed-source desktop app).
 
 ### License
 
-MIT © Tinqiao Technology (Beijing) Co., Ltd. — see [LICENSE](LICENSE)
+MIT © Beijing Tinqiao Technology Co., Ltd. — see [LICENSE](LICENSE)
 (English, authoritative) and [LICENSE.zh-CN.md](LICENSE.zh-CN.md)
 (non-official Chinese translation, for reference).
 

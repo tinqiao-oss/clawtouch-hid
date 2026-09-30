@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
+# SPDX-FileCopyrightText: 2026 Beijing Tinqiao Technology Co., Ltd.
 """Wire protocol v1.1 — locked frame layout (additive over v1.0 frozen baseline).
 
 THIS TEST FILE IS A CONTRACT. v1.0 (frozen 2026-03-15) opcodes never

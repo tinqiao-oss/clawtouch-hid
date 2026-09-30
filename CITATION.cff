@@ -8,7 +8,7 @@ abstract: >-
   clawtouch-hid-protocol Python package.
 type: software
 authors:
-  - name: "Tinqiao Technology (Beijing) Co., Ltd."
+  - name: "Beijing Tinqiao Technology Co., Ltd."
     website: "https://clawtouch.cn"
 repository-code: "https://github.com/tinqiao-oss/clawtouch-hid"
 url: "https://github.com/tinqiao-oss/clawtouch-hid"

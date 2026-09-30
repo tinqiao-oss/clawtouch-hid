@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2026 Tinqiao Technology (Beijing) Co., Ltd.
+# SPDX-FileCopyrightText: 2026 Beijing Tinqiao Technology Co., Ltd.
 """USB descriptor setup for the ClawTouch HID firmware — PRODUCTION variant.
 
 Runs once at boot on the Pico 2. Locks the device down to ONLY the two
