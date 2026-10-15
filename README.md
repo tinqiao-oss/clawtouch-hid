@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
-[![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
+[![Website: clawtouch.cn](https://img.shields.io/badge/website-clawtouch.cn-orange.svg)](https://clawtouch.cn/en/open-source.html)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tinqiao-oss/clawtouch-hid/master/docs/assets/hero.png" alt="clawtouch-hid signal flow: a host program (clawtouch-mcp, a Python script using clawtouch-hid-protocol, or any custom bridge) sends framed bytes over USB-CDC to a Raspberry Pi Pico 2 running the ClawTouch HID firmware in this repository, which emits standard USB HID reports to the target operating system. The v1.0 baseline wire frame layout is shown on the right (v1.1 adds new opcodes without changing the frame structure): 0xAA preamble, seq u16, cmd u8, plen u16, payload, csum u8." width="900">
@@ -118,8 +118,8 @@ A complete, runnable PING example lives at [`examples/ping_test.py`](https://git
 You can use any RP2350 board (e.g. a Raspberry Pi Pico 2, ~$8 from
 electronics retailers), flash this firmware, and you have a working
 ClawTouch HID device. Prefer not to flash it yourself? Pre-flashed,
-enclosed kits are a separate commercial product — see
-[clawtouch.cn](https://clawtouch.cn). The wire protocol is identical
+enclosed dev kits ship within China — see
+[clawtouch.cn](https://clawtouch.cn/en/open-source.html#get-hardware). The wire protocol is identical
 either way; this repository targets the hardware-level open source path.
 
 ## Wire protocol at a glance
@@ -336,9 +336,9 @@ something a software-only path can't do at all.
 
 **Do I need ClawTouch's hardware to use this?**
 No. A bare Raspberry Pi Pico 2 (~$8) flashed with the firmware in this
-repo is a working ClawTouch HID device. The commercial product bundles
-that same firmware in a nicer enclosure with QA, drop-shipping, and a
-support contract — the wire protocol is identical.
+repo is a working ClawTouch HID device. The pre-flashed dev kit bundles
+that same firmware with an enclosure and a cable — the wire protocol is
+identical.
 
 **Do I need ClawTouch's backend / account / API key?**
 No. Nothing in this repository talks to any network. The firmware speaks
@@ -352,16 +352,9 @@ CircuitPython-only and needs the board's `usb_hid` / `usb_cdc` modules at
 import time, so it cannot be run on a normal Python interpreter directly
 — use the protocol module or the parser for offline tests.
 
-**How is this different from the closed-source ClawTouch desktop app?**
-This repo is the bottom layer only — raw HID primitives over a frozen
-wire protocol — so other agent stacks can use ClawTouch hardware
-without adopting the whole ClawTouch product. The closed-source
-desktop product is a separate agent that runs on top of the same
-hardware; contact `support@tinqiao.com` for details.
-
 ## Open source roadmap, contributing & license
 
-**Open-core model.** Hardware and protocol primitives are open; the integrated commercial product stays closed.
+The firmware, wire protocol, MCP server and skill templates are all MIT-licensed.
 
 | Component                                              | Status                   |
 |--------------------------------------------------------|--------------------------|
@@ -369,7 +362,6 @@ hardware; contact `support@tinqiao.com` for details.
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ Released |
 | **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (markdown skill files for LLM agents) | ✅ Released |
 | **clawtouch-bridge-sdk** (Python + Node HID SDK)       | 🔵 Future                |
-| Backend / desktop app / adapters / vision models       | 🔒 Closed source — contact `support@tinqiao.com` |
 
 ### Contributing
 
@@ -380,8 +372,8 @@ English translations, hardware compatibility reports.
 We're _not_ taking PRs for: agent-loop logic or application-level
 features (intentionally out of scope — firmware translates frames to
 HID reports, nothing else), protocol changes that break v1.0
-compatibility, or application-specific adapters (those live in the
-closed-source desktop app).
+compatibility, or application-specific adapters (app-specific know-how belongs in
+[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills) as Markdown).
 
 ### License
 
@@ -396,8 +388,7 @@ marks referenced in this repository) are covered separately in
 [TRADEMARKS.md](TRADEMARKS.md) — the MIT License does **not** grant
 any trademark rights.
 
-For commercial deployments at scale, enterprise support, or OEM hardware
-discussion: `support@tinqiao.com`.
+Questions: `support@tinqiao.com`.
 
 ## About
 

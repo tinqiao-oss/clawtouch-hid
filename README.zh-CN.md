@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Wire protocol: epoch 1](https://img.shields.io/badge/wire%20protocol-epoch%201-blue.svg)](https://github.com/tinqiao-oss/clawtouch-hid/blob/master/docs/protocol-v1.zh-CN.md)
 [![CircuitPython 10.x](https://img.shields.io/badge/CircuitPython-10.x-purple.svg)](https://circuitpython.org/)
-[![Commercial: clawtouch.cn](https://img.shields.io/badge/commercial-clawtouch.cn-orange.svg)](https://clawtouch.cn)
+[![官网: clawtouch.cn](https://img.shields.io/badge/website-clawtouch.cn-orange.svg)](https://clawtouch.cn/open-source.html)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tinqiao-oss/clawtouch-hid/master/docs/assets/hero.png" alt="clawtouch-hid 信号流: 宿主程序 (clawtouch-mcp、用 clawtouch-hid-protocol 的 Python 脚本、或自定义 bridge) 通过 USB-CDC 发带帧字节到 Raspberry Pi Pico 2 (跑本仓库的 ClawTouch HID 固件), Pico 输出标准 USB HID 报告到目标操作系统。右侧展示 v1.0 baseline 线协议帧格式 (v1.1 累加新 opcode 但不改帧结构): 0xAA 前导 + seq u16 + cmd u8 + plen u16 + payload + csum u8。" width="900">
@@ -104,8 +104,8 @@ USB HID 驱动另一台目标机) 是同一块硬件解锁的**附加**能力, �
 
 你可以用任意 RP2350 板 (例如 Raspberry Pi Pico 2, ¥55 左右从电子件
 零售商可买), 烧上本仓库的固件, 就是一台能用的 ClawTouch HID 设备。
-不想自己烧? 烧好固件、带外壳的开发者套件是独立的商业产品, 见
-[clawtouch.cn](https://clawtouch.cn); 线协议两者完全一致。本仓库聚焦硬件层的开源方案。
+不想自己烧? 也有烧好固件、带外壳的开发者套件, 见
+[clawtouch.cn](https://clawtouch.cn/open-source.html#get-hardware); 线协议两者完全一致。本仓库聚焦硬件层的开源方案。
 
 ## 通信协议速览
 
@@ -288,8 +288,8 @@ ClawTouch 不可替代的优势是**真实硬件 HID 通路**: 操作系统看�
 
 **必须买 ClawTouch 硬件才能用吗?**
 不用。一块裸 Raspberry Pi Pico 2(¥55 左右)刷上本仓库的固件就是一台
-能用的 ClawTouch HID 设备。商业产品在此基础上做了外壳、QA、配送和
-售后支持 —— 线协议完全一致。
+能用的 ClawTouch HID 设备。烧好固件的开发者套件只是在此基础上
+加了外壳和数据线 —— 线协议完全一致。
 
 **需要 ClawTouch 后端 / 账号 / API key 吗?**
 不需要。本仓库里没有任何东西访问网络。固件通过 USB 跟宿主对话,宿主
@@ -301,14 +301,9 @@ ClawTouch 不可替代的优势是**真实硬件 HID 通路**: 操作系统看�
 CircuitPython 上,因为它在 import 时就依赖板上的 `usb_hid` / `usb_cdc`
 模块,普通 Python 解释器跑不起来 —— 离线测试请用协议模块或 packet_parser。
 
-**跟闭源的 ClawTouch 桌面端有什么区别?**
-本仓库只是最底层 —— 纯 HID 原语 + 冻结线协议 —— 让其他 agent 框架
-能在不绑定 ClawTouch 完整产品的前提下使用硬件。闭源桌面端是跑在同一
-套硬件之上的独立 agent, 邮件咨询 `support@tinqiao.com`。
-
 ## 开源路线图、参与贡献与许可
 
-ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业产品闭源。
+固件、线协议、MCP server 与技能模板全部 MIT 开源。
 
 | 组件                                              | 状态                  |
 |---------------------------------------------------|-----------------------|
@@ -316,7 +311,6 @@ ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业�
 | **[clawtouch-mcp](https://github.com/tinqiao-oss/clawtouch-mcp)** (MCP server) | ✅ 已发布 |
 | **[clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills)** (给 LLM agent 用的 markdown skill 文件) | ✅ 已发布 |
 | **clawtouch-bridge-sdk** (Python + Node HID SDK)  | 🔵 规划中             |
-| 后端服务 / 桌面端 / 应用适配器 / 视觉模型         | 🔒 闭源 — 邮件咨询 `support@tinqiao.com` |
 
 ### 参与贡献
 
@@ -325,7 +319,7 @@ ClawTouch 采用 **open-core** 模式:硬件与协议层开源,集成的商业�
 
 **不接受**的 PR:agent 循环逻辑或应用层功能(故意排除在范围外 ——
 固件只把帧翻译成 HID 报告)、破坏 v1.0 兼容性的协议改动、应用专属
-适配器(这部分在闭源桌面端)。
+适配器(特定应用的操作经验请以 Markdown 形式贡献到 [clawtouch-skills](https://github.com/tinqiao-oss/clawtouch-skills))。
 
 ### License
 
@@ -338,7 +332,7 @@ MIT © 北京亭桥科技有限公司 — 见 [LICENSE](LICENSE) (英文版, 法
 仓库引用的第三方商标) 由 [TRADEMARKS.md](TRADEMARKS.md) 单独规约
 —— MIT 协议**不**授予任何商标权利。
 
-商业部署 / 企业支持 / OEM 硬件合作咨询:`support@tinqiao.com`
+其他问题:`support@tinqiao.com`
 
 ## 关于项目
 
