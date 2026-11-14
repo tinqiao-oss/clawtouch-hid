@@ -1,10 +1,20 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 Beijing Tinqiao Technology Co., Ltd.
-"""ClawTouch HID firmware v1.1.2 — Raspberry Pi Pico 2.
+"""ClawTouch HID firmware v1.2.0 — Raspberry Pi Pico 2.
 
 Generic HID executor: reads framed protocol packets from the USB CDC data
 channel and executes the corresponding HID action. The firmware does
 nothing on its own — all decisions live on the host.
+
+v1.2.0 (2026-11-14): absolute pointer. boot.py now also enables a second,
+absolute mouse (X/Y 0..32767, report ID 4) and the new opcode
+``MOUSE_MOVE_ABS`` (0x15) puts the pointer at a position in one report,
+so the host no longer has to nudge the relative mouse and read the cursor
+back until it converges. STATUS_RESPONSE gains ``"caps": ["abs"]`` when
+the absolute pointer is present. Existing opcodes are byte-for-byte
+unchanged. A host that sends 0x15 to an older firmware — or to this
+code.py running under a pre-1.2 boot.py — gets ERR_UNKNOWN_COMMAND and
+keeps using relative moves.
 
 v1.1.2 (2026-05-31): panic-stop now releases mouse buttons too. The
 all-zero ``KEY_RELEASE(0, 0)`` (a.k.a. ``hid.release_all``) branch used
@@ -76,7 +86,7 @@ from adafruit_hid.mouse import Mouse
 # ════════════════════════════════════════════════════════════════════
 
 HEADER = 0xAA
-FIRMWARE_VERSION = "1.1.2"
+FIRMWARE_VERSION = "1.2.0"
 BOARD_NAME = "pico2"
 MAX_PAYLOAD_LEN = 1024
 
@@ -88,6 +98,7 @@ CMD_MOUSE_CLICK = 0x11
 CMD_MOUSE_SCROLL = 0x12
 CMD_MOUSE_BUTTON_DOWN = 0x13    # v1.1
 CMD_MOUSE_BUTTON_UP = 0x14      # v1.1
+CMD_MOUSE_MOVE_ABS = 0x15       # v1.2 (firmware 1.2.0)
 CMD_KEY_PRESS = 0x20
 CMD_KEY_RELEASE = 0x21
 CMD_KEY_TYPE = 0x22         # wire name: KEY_TYPE_STRING
@@ -119,9 +130,12 @@ MOUSE_BUTTON_MAP = {
 class HidExecutor:
     """Parses one protocol packet and executes the corresponding HID action."""
 
-    def __init__(self, keyboard, mouse, layout, serial_out):
+    def __init__(self, keyboard, mouse, layout, serial_out, abs_pointer=None):
         self.keyboard = keyboard
         self.mouse = mouse
+        # usb_hid.Device for the absolute pointer, or None when boot.py
+        # predates firmware 1.2 and never enabled one.
+        self.abs_pointer = abs_pointer
         self.layout = layout
         self.serial_out = serial_out
         self._uptime_ms = 0
@@ -133,6 +147,7 @@ class HidExecutor:
             CMD_MOUSE_SCROLL: self._handle_mouse_scroll,
             CMD_MOUSE_BUTTON_DOWN: self._handle_mouse_button_down,   # v1.1
             CMD_MOUSE_BUTTON_UP: self._handle_mouse_button_up,       # v1.1
+            CMD_MOUSE_MOVE_ABS: self._handle_mouse_move_abs,         # v1.2
             CMD_KEY_PRESS: self._handle_key_press,
             CMD_KEY_RELEASE: self._handle_key_release,
             CMD_KEY_TYPE: self._handle_key_type,
@@ -265,6 +280,28 @@ class HidExecutor:
         self.mouse.release(button)
         self._send_ack(seq_id)
 
+    def _handle_mouse_move_abs(self, seq_id, payload):
+        if self.abs_pointer is None:
+            # This code.py under a pre-1.2 boot.py: the USB device has no
+            # absolute pointer. Answer exactly as a pre-1.2 firmware answers
+            # an opcode it does not know, so the host falls back to relative
+            # moves through one code path instead of two.
+            self._send_error(seq_id, ERR_UNKNOWN_COMMAND, f"{CMD_MOUSE_MOVE_ABS:#x}")
+            return
+        if len(payload) < 4:
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "MOVEABS:4B")
+            return
+        x, y = struct.unpack("<HH", payload[:4])
+        if x > 0x7FFF or y > 0x7FFF:
+            # The report descriptor's logical range is 0..32767; a value
+            # above it is outside what the OS maps, not a far edge.
+            self._send_error(seq_id, ERR_INVALID_PAYLOAD, "MOVEABS:range")
+            return
+        # [buttons:uint8][x:uint16 LE][y:uint16 LE]; buttons stay 0 —
+        # clicks go through the relative mouse.
+        self.abs_pointer.send_report(struct.pack("<BHH", 0, x, y))
+        self._send_ack(seq_id)
+
     def _handle_key_press(self, seq_id, payload):
         if len(payload) < 2:
             self._send_error(seq_id, ERR_INVALID_PAYLOAD, "PRESS:2B")
@@ -322,11 +359,15 @@ class HidExecutor:
         self._send_ack(seq_id)
 
     def _handle_status_request(self, seq_id, payload):
-        status = json.dumps({
+        info = {
             "fw_ver": FIRMWARE_VERSION,
             "board": BOARD_NAME,
             "uptime_ms": self._uptime_ms,
-        }).encode("utf-8")
+        }
+        if self.abs_pointer is not None:
+            # Additive key: hosts that predate it ignore unknown keys.
+            info["caps"] = ["abs"]
+        status = json.dumps(info).encode("utf-8")
         self._send_response(CMD_STATUS_RESP, seq_id, status)
 
     # ── Helpers ──
@@ -369,6 +410,16 @@ class HidExecutor:
             self.serial_out.write(packet)
 
 
+def find_abs_pointer(devices):
+    """The absolute pointer boot.py enabled, or None.
+
+    boot.py (1.2+) enables KEYBOARD, MOUSE, ABS_POINTER in that order. Both
+    mice are Generic Desktop / Mouse, so the absolute one is the SECOND
+    such device; ``Mouse()`` takes the first. A pre-1.2 boot.py has one."""
+    mice = [d for d in devices if d.usage_page == 0x01 and d.usage == 0x02]
+    return mice[1] if len(mice) > 1 else None
+
+
 # ════════════════════════════════════════════════════════════════════
 # Console banner (CDC0 / REPL)
 # Printed once at startup. Visible via `mpremote connect auto repl`,
@@ -406,11 +457,12 @@ def _main():
 
     # Initialise HID devices
     keyboard = Keyboard(usb_hid.devices)
-    mouse = Mouse(usb_hid.devices)
+    mouse = Mouse(usb_hid.devices)  # the FIRST mouse: the relative one
     layout = KeyboardLayoutUS(keyboard)
     serial = usb_cdc.data
 
-    executor = HidExecutor(keyboard, mouse, layout, serial)
+    executor = HidExecutor(keyboard, mouse, layout, serial,
+                           abs_pointer=find_abs_pointer(usb_hid.devices))
 
     buf = bytearray()
 

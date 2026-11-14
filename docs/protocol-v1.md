@@ -9,15 +9,16 @@
 > bump it.
 > **Not SemVer.** The wire protocol is identified by its epoch, not a
 > `major.minor.patch`. The thing with SemVer is the `clawtouch-hid-protocol`
-> Python package that *describes* this epoch (currently `1.1.1`) — and,
-> separately, the firmware (currently `1.1.2`). Do not confuse epoch with
+> Python package that *describes* this epoch (currently `1.2.0`) — and,
+> separately, the firmware (currently `1.2.0`). Do not confuse epoch with
 > either package version. Where older notes say "protocol v1.0 / v1.1",
 > read them as **opcode-set milestones** (module releases) within epoch 1,
 > not wire-protocol versions.
 > **Opcode-set history within epoch 1:** baseline opcodes frozen
 > 2026-03-15; `MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP` (`0x13` / `0x14`)
 > added additively 2026-05-28 for drag gestures + Anthropic Computer Use
-> parity.
+> parity; `MOUSE_MOVE_ABS` (`0x15`) added additively 2026-11-14 for the
+> firmware 1.2 absolute pointer.
 > **Scope:** Host (PC) ↔ ClawTouch HID device (Raspberry Pi Pico 2)
 
 ---
@@ -105,6 +106,7 @@ illustrative; query `STATUS_REQUEST` for the live value.
 | MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | Wheel scroll |
 | MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | Press, no release (drag start) |
 | MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | Release named button (drag end) |
+| MOUSE_MOVE_ABS     | `0x15` | `[x:uint16 LE] [y:uint16 LE]`        | fw 1.2 | Absolute position, 0..32767 |
 
 **MOUSE_MOVE flags:**
 
@@ -113,9 +115,9 @@ illustrative; query `STATUS_REQUEST` for the live value.
   pixel delta** — USB HID Boot Mouse, which this firmware implements,
   has no absolute-coordinate report. Absolute interpretation is the
   host's responsibility (e.g. `clawtouch-mcp` queries the OS cursor
-  position and converts to a delta). The flag stays in the wire
-  format so a future firmware revision targeting an HID Digitizer
-  profile can switch on it without renumbering opcodes.
+  position and converts to a delta). Firmware 1.2 does **not** use this
+  bit for its absolute pointer — older firmware ignores it, so it could
+  never be switched on safely; see `MOUSE_MOVE_ABS` below.
 
 **MOUSE_MOVE magnitude:**
 
@@ -137,6 +139,30 @@ illustrative; query `STATUS_REQUEST` for the live value.
 **MOUSE_CLICK flags:**
 
 - bit0 = 1: double-click (firmware emits two `mouse.click` reports back-to-back)
+
+**MOUSE_MOVE_ABS (firmware 1.2.0+):**
+
+- Payload `[x:uint16 LE] [y:uint16 LE]`, each `0..32767`. The firmware sends
+  one report on a second, **absolute** HID pointer (report ID 4, enabled by
+  `boot.py` 1.2+) and answers `ACK`. Values above `32767` → `ERROR /
+  INVALID_PAYLOAD`, nothing moves.
+- `0..32767` spans the screen area the **OS** maps an absolute pointer to.
+  Measured on Windows 11 (2026-11-14, 5120x1440 primary + 2560x1440
+  secondary): the **primary monitor only** — pixel `x = floor(v * W / 32768)`,
+  and the secondary is unreachable. Windows also **drops a report of exactly
+  `(0, 0)`**; `(1, 1)` already lands on pixel `(0, 0)`. Other OSes are
+  unmeasured — hosts should convert, move, and read the cursor back.
+- A firmware older than 1.2.0 — and 1.2 `code.py` running under a pre-1.2
+  `boot.py` (no absolute pointer enabled) — answers `ERROR /
+  UNKNOWN_COMMAND`. That is the capability probe: fall back to relative
+  `MOUSE_MOVE`. `STATUS_RESPONSE` also carries `"caps": ["abs"]` when the
+  pointer is present.
+- Why a new opcode and not `MOUSE_MOVE`'s reserved bit0: every firmware
+  before 1.2 ignores that bit, so an absolute position sent that way would
+  be executed as a huge **relative** jump on boards already in the field.
+  An unknown opcode is refused instead.
+- Clicks still go through `MOUSE_CLICK` on the relative mouse; the absolute
+  pointer never presses a button.
 
 **MOUSE_BUTTON_DOWN / MOUSE_BUTTON_UP (v1.1):**
 
@@ -242,3 +268,4 @@ respond to them with `ERROR / UNKNOWN_COMMAND`.
 |---------|-------------|-------|
 | v0.1    | 2026-03-12  | Initial draft |
 | v1.0    | 2026-03-15  | Frozen: error code table, timeout recommendations, STATUS_RESPONSE schema, maximum frame size constraint |
+| module 1.2.0 / fw 1.2.0 | 2026-11-14 | Additive: `MOUSE_MOVE_ABS` (`0x15`); `STATUS_RESPONSE` may carry `"caps": ["abs"]` |

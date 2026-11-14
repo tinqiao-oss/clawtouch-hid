@@ -4,10 +4,12 @@
 
 > Last verified: 2026-03-14 — flash *procedure* on CircuitPython 10.1.4
 > + a Raspberry Pi Pico 2. The same procedure flashes every firmware in
-> this repo through v1.1.2: the v1.1.0 drag opcodes, the v1.1.1 keyboard
-> byte-order unification, and the v1.1.2 panic-stop fix are all
-> `code.py`-only changes — no `boot.py` or bootloader change — so the
-> flash path is identical.
+> this repo. Through v1.1.2 every change was `code.py`-only. **v1.2.0
+> also changes `boot.py`** (it adds the absolute pointer): copy both
+> files, then unplug and re-plug — re-verified that way on 2026-11-14
+> (CircuitPython 10.1.4, Pico 2). Until the replug, the new `code.py`
+> runs under the old `boot.py`, answers the absolute-move command as
+> unknown, and the host keeps using relative moves.
 
 ## What you need
 
@@ -24,7 +26,9 @@
 2. Hold down the **BOOTSEL** button on the Pico 2 (the only push-button on
    the board; on a ClawTouch cased unit it's the button on the **left** when
    the USB-C port faces up), then plug in the USB cable while still holding it.
-3. A USB drive named `RPI-RP2` will appear (it contains `INFO_UF2.TXT`).
+3. A USB drive named `RP2350` will appear (it contains `INFO_UF2.TXT`).
+   (`RPI-RP2` is the name used by the older RP2040 Pico — if you see that,
+   the board is not a Pico 2.)
 4. Drag the downloaded `.uf2` file onto that drive.
 5. The Pico 2 reboots automatically; the drive renames itself to
    `CIRCUITPY`.

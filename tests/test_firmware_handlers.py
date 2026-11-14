@@ -166,3 +166,119 @@ def test_targeted_key_release_does_not_touch_mouse():
     ex.process_packet(build_key_release(keycode=0, modifiers=0x01, seq_id=1).serialize())
     assert mouse.release_all_calls == 0
     assert kbd.released  # at least one targeted key release recorded
+
+
+# ── v1.2: absolute pointer (MOUSE_MOVE_ABS 0x15) ──
+
+import json  # noqa: E402
+import re  # noqa: E402
+
+from clawtouch_hid_protocol import (  # noqa: E402
+    CommandType,
+    ErrorCode,
+    HidCommand,
+    build_mouse_move_abs,
+)
+
+
+class _RecSerial:
+    def __init__(self):
+        self.frames = []
+
+    def write(self, data):
+        self.frames.append(HidCommand.deserialize(bytes(data)))
+
+
+class _RecAbsPointer:
+    def __init__(self):
+        self.reports = []
+
+    def send_report(self, report):
+        self.reports.append(bytes(report))
+
+
+def _make_abs_executor(with_abs=True):
+    out = _RecSerial()
+    ptr = _RecAbsPointer() if with_abs else None
+    ex = fw.HidExecutor(_RecKeyboard(), _RecMouse(), layout=None,
+                        serial_out=out, abs_pointer=ptr)
+    return ex, out, ptr
+
+
+def test_move_abs_sends_one_report_and_acks():
+    ex, out, ptr = _make_abs_executor()
+    ex.process_packet(build_mouse_move_abs(16387, 3, seq_id=9).serialize())
+    # [buttons=0][x LE][y LE] - the 5-byte input report the descriptor declares
+    assert ptr.reports == [bytes([0x00, 0x03, 0x40, 0x03, 0x00])]
+    assert out.frames[-1].cmd_type == CommandType.ACK
+    assert out.frames[-1].seq_id == 9
+
+
+def test_move_abs_without_pointer_answers_like_old_firmware():
+    """code.py 1.2 under a pre-1.2 boot.py has no absolute pointer. It must
+    answer exactly as a pre-1.2 firmware answers an unknown opcode, so the
+    host takes one fallback path for both."""
+    ex, out, _ = _make_abs_executor(with_abs=False)
+    ex.process_packet(build_mouse_move_abs(100, 100, seq_id=3).serialize())
+    err = out.frames[-1]
+    assert err.cmd_type == CommandType.ERROR
+    assert err.payload[0] == ErrorCode.UNKNOWN_COMMAND
+    assert err.payload[1:] == b"0x15"  # what the generic unknown branch sends
+
+
+def test_move_abs_rejects_out_of_range_without_moving():
+    ex, out, ptr = _make_abs_executor()
+    frame = HidCommand(CommandType.MOUSE_MOVE_ABS, bytes([0x00, 0x80, 0x00, 0x00]), 4)
+    ex.process_packet(frame.serialize())
+    assert ptr.reports == []
+    assert out.frames[-1].payload[0] == ErrorCode.INVALID_PAYLOAD
+
+
+def test_move_abs_rejects_short_payload():
+    ex, out, ptr = _make_abs_executor()
+    ex.process_packet(HidCommand(CommandType.MOUSE_MOVE_ABS, bytes([1, 2]), 6).serialize())
+    assert ptr.reports == []
+    assert out.frames[-1].payload[0] == ErrorCode.INVALID_PAYLOAD
+
+
+def test_status_reports_abs_cap_only_when_present():
+    for with_abs, expected in ((True, ["abs"]), (False, None)):
+        ex, out, _ = _make_abs_executor(with_abs=with_abs)
+        ex.process_packet(HidCommand(CommandType.STATUS_REQUEST, b"", 1).serialize())
+        info = json.loads(out.frames[-1].payload.decode("utf-8"))
+        assert info["fw_ver"] == fw.FIRMWARE_VERSION
+        assert info.get("caps") == expected
+
+
+class _Dev:
+    def __init__(self, page, usage):
+        self.usage_page, self.usage = page, usage
+
+
+def test_find_abs_pointer_is_the_second_mouse():
+    kbd, rel, abs_ = _Dev(1, 6), _Dev(1, 2), _Dev(1, 2)
+    assert fw.find_abs_pointer((kbd, rel, abs_)) is abs_
+    assert fw.find_abs_pointer((kbd, rel)) is None  # pre-1.2 boot.py
+
+
+def _abs_block(path):
+    text = (_REPO_ROOT / "firmware" / path).read_text(encoding="utf-8")
+    m = re.search(r"ABS_POINTER = usb_hid\.Device\((.*?)\n\)\n", text, re.S)
+    assert m, f"no ABS_POINTER block in {path}"
+    return m.group(1)
+
+
+def test_dev_and_production_boot_declare_the_same_abs_pointer():
+    """Both boot files carry the descriptor inline (boot.py cannot rely on
+    an extra module being copied). A drift would make the production
+    firmware behave differently from the one that was tested."""
+    assert _abs_block("boot.py") == _abs_block("boot_production.py")
+
+
+def test_abs_descriptor_matches_the_handler():
+    """The descriptor's report must be the 5 bytes the handler packs: one
+    button byte, then 16-bit X and Y with logical max 32767."""
+    block = _abs_block("boot.py")
+    assert "report_ids=(4,)" in block and "in_report_lengths=(5,)" in block
+    assert "0x26, 0xFF, 0x7F" in block  # Logical Maximum (32767)
+    assert "0x75, 0x10" in block and "0x95, 0x02" in block  # 2 x 16 bits
