@@ -26,9 +26,13 @@ import struct
 from dataclasses import dataclass
 from enum import IntEnum
 
-PROTOCOL_VERSION = "1.1.1"
+PROTOCOL_VERSION = "1.2.0"
 FRAME_HEADER = 0xAA
 MAX_PAYLOAD_LEN = 1024
+# Logical range of MOUSE_MOVE_ABS x/y (the absolute pointer's report
+# descriptor): 0 is the left/top edge of the area the OS maps the pointer
+# to, ABS_POINTER_MAX the right/bottom edge.
+ABS_POINTER_MAX = 0x7FFF
 
 
 class CommandType(IntEnum):
@@ -40,6 +44,7 @@ class CommandType(IntEnum):
     MOUSE_SCROLL = 0x12
     MOUSE_BUTTON_DOWN = 0x13   # v1.1, press only (no release)
     MOUSE_BUTTON_UP = 0x14     # v1.1, release only
+    MOUSE_MOVE_ABS = 0x15      # v1.2, absolute position (firmware 1.2.0+)
     KEY_PRESS = 0x20
     KEY_RELEASE = 0x21
     KEY_TYPE_STRING = 0x22
@@ -185,6 +190,24 @@ def build_mouse_button_up(button: MouseButton, *, seq_id: int = 0) -> HidCommand
     releasing a non-held button is a no-op (no error)."""
     payload = struct.pack("B", int(button))
     return HidCommand(CommandType.MOUSE_BUTTON_UP, payload, seq_id)
+
+
+def build_mouse_move_abs(x: int, y: int, *, seq_id: int = 0) -> HidCommand:
+    """v1.2 (firmware 1.2.0+): put the pointer at an absolute position.
+
+    ``x`` / ``y`` are 0..:data:`ABS_POINTER_MAX` across the screen area the
+    OS maps the device's absolute pointer to — which area that is (primary
+    monitor, whole virtual desktop) is the OS's choice, so convert from
+    pixels on the host and verify where the cursor landed. Firmware older
+    than 1.2.0, or 1.2 code running under a pre-1.2 ``boot.py``, answers
+    ``ERROR(UNKNOWN_COMMAND)``: fall back to relative ``MOUSE_MOVE``."""
+    x, y = int(x), int(y)
+    if not (0 <= x <= ABS_POINTER_MAX and 0 <= y <= ABS_POINTER_MAX):
+        raise ProtocolError(
+            f"absolute position out of range 0..{ABS_POINTER_MAX}: ({x}, {y})"
+        )
+    payload = struct.pack("<HH", x, y)
+    return HidCommand(CommandType.MOUSE_MOVE_ABS, payload, seq_id)
 
 
 def build_key_press(keycode: int, modifiers: int = 0, *, seq_id: int = 0) -> HidCommand:

@@ -9,7 +9,39 @@ edits to existing ones. The `clawtouch-hid-protocol` Python package
 tracks the protocol version; the firmware version is tagged
 separately on each release.
 
-## [Unreleased] — docs & packaging hygiene (pre-publish sweep)
+## [Unreleased]
+
+## [1.2.0] — 2026-11-14 — Absolute pointer (`MOUSE_MOVE_ABS`, firmware 1.2.0) · docs & packaging hygiene
+
+### Added — absolute pointer (`MOUSE_MOVE_ABS`, `0x15`; firmware 1.2.0, module 1.2.0)
+
+- `boot.py` (dev and production, same descriptor, a test keeps them equal)
+  enables a second, absolute HID mouse: X/Y `0..32767`, report ID 4. The new
+  opcode puts the pointer at a position in **one report**, so a host no
+  longer has to nudge the relative mouse and read the cursor back until it
+  converges. Clicks stay on the relative mouse.
+- A new opcode, not `MOUSE_MOVE`'s reserved bit0: every earlier firmware
+  ignores that bit, so an absolute position sent through it would run as a
+  huge relative jump on boards already in use. An unknown opcode is refused
+  instead (`ERROR / UNKNOWN_COMMAND`), which is the capability probe — and
+  1.2 `code.py` under a pre-1.2 `boot.py` answers the same way.
+  `STATUS_RESPONSE` adds `"caps": ["abs"]` when the pointer exists.
+- Measured on Windows 11 with a Pico 2 (2026-11-14): the absolute range maps
+  onto the **primary monitor only** (the secondary is unreachable), pixel =
+  `floor(v * W / 32768)`, and a report of exactly `(0, 0)` is dropped.
+  `clawtouch-mcp` turns this into a one-report move; see its changelog.
+- `clawtouch_hid_protocol`: `CommandType.MOUSE_MOVE_ABS`,
+  `build_mouse_move_abs()`, `ABS_POINTER_MAX`; `PROTOCOL_VERSION` 1.2.0.
+- Flashing: `boot.py` changed, so copy both files and replug
+  (`docs/flash-guide.md`).
+
+### Fixed — tests: the combined monorepo run skipped this package's protocol tests
+
+`tests/test_protocol.py` shared its name with `clawtouch-mcp`'s, and under
+`--import-mode=importlib` the second import resolved to the first module:
+the documented combined run collected `clawtouch-mcp`'s 21 protocol tests
+twice and none of the 22 here. Renamed to `tests/test_hid_protocol.py`.
+
 
 ### Documented — MOUSE_MOVE int16/int8 magnitude contract
 
@@ -467,5 +499,6 @@ first public bundle shipping it.
 unified to `[modifiers, keycode]` across all three keyboard commands
 in 1.1.1 — see the entry at the top of this file.)
 
-[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/tinqiao-oss/clawtouch-hid/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/tinqiao-oss/clawtouch-hid/releases/tag/v1.1.1

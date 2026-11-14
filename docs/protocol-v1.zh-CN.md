@@ -6,12 +6,13 @@
 > 整数, **只**在"破坏帧信封 / 改既有 opcode 语义"时才 +1(设计上几乎不动). 新增
 > opcode 是**纪元内的加法**, 永不升 epoch.
 > **不用 SemVer.** 线协议靠 epoch 标识, 不是 `major.minor.patch`. 带 SemVer 的是
-> *描述本 epoch* 的 `clawtouch-hid-protocol` Python 包(现 `1.1.1`), 以及单独的固件
-> (现 `1.1.2`)—— epoch 跟这两个包版本都不是一回事. 历史文档里写的"协议 v1.0 / v1.1"
+> *描述本 epoch* 的 `clawtouch-hid-protocol` Python 包(现 `1.2.0`), 以及单独的固件
+> (现 `1.2.0`)—— epoch 跟这两个包版本都不是一回事. 历史文档里写的"协议 v1.0 / v1.1"
 > 应理解为 epoch 1 内的 **opcode 集里程碑**(模块发布), 不是"线协议第 1.1 版".
 > **epoch 1 内的 opcode 集历史:** 基线 opcode 2026-03-15 冻结;
 > `MOUSE_BUTTON_DOWN` / `MOUSE_BUTTON_UP`(`0x13` / `0x14`)2026-05-28 累加,
-> 用于拖拽手势 + 兼容 Anthropic Computer Use.
+> 用于拖拽手势 + 兼容 Anthropic Computer Use; `MOUSE_MOVE_ABS`(`0x15`)2026-11-14
+> 累加, 用于固件 1.2 的绝对坐标指针.
 > **适用范围:** 宿主(PC)↔ ClawTouch HID 设备(Raspberry Pi Pico 2)
 
 ---
@@ -95,15 +96,16 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 | MOUSE_SCROLL       | `0x12` | `[delta:int16 LE]`                   | v1.0 | 滚轮 |
 | MOUSE_BUTTON_DOWN  | `0x13` | `[button:uint8]`                     | v1.1 | 按下不松(拖拽起点) |
 | MOUSE_BUTTON_UP    | `0x14` | `[button:uint8]`                     | v1.1 | 松开指定按钮(拖拽终点) |
+| MOUSE_MOVE_ABS     | `0x15` | `[x:uint16 LE] [y:uint16 LE]`        | 固件 1.2 | 绝对位置, 0..32767 |
 
 **MOUSE_MOVE flags:**
 
 - bit0: 保留用于 relative/absolute 区分. **v1.0 固件忽略本 bit, 始终
   把 `(x, y)` 当作相对像素 delta 处理** —— 本固件实现的是 USB HID
   Boot Mouse, 该协议本身没有绝对坐标报告能力. 绝对坐标语义由 host
-  端负责 (例如 `clawtouch-mcp` 查询 OS 光标位置后换算成 delta). 本
-  字段在线协议中保留, 让未来某个改用 HID Digitizer profile 的固件
-  版本能直接启用而不必新增 opcode.
+  端负责 (例如 `clawtouch-mcp` 查询 OS 光标位置后换算成 delta). 固件
+  1.2 的绝对指针**不**用这一位 —— 旧固件忽略它, 永远没法安全启用; 见下面的
+  `MOUSE_MOVE_ABS`.
 
 **MOUSE_CLICK button:**
 
@@ -112,6 +114,24 @@ Pico 2 上的 ClawTouch HID 固件之间的通信协议。传输层走 USB CDC
 **MOUSE_CLICK flags:**
 
 - bit0 = 1: 双击 (固件背靠背发两个 `mouse.click` 报告)
+
+**MOUSE_MOVE_ABS (固件 1.2.0+):**
+
+- Payload `[x:uint16 LE] [y:uint16 LE]`, 各 `0..32767`. 固件在第二个、**绝对坐标**
+  HID 指针 (报告 ID 4, 由 1.2+ 的 `boot.py` 启用) 上发一个报告, 回 `ACK`.
+  超过 `32767` → `ERROR / INVALID_PAYLOAD`, 指针不动.
+- `0..32767` 覆盖的是**操作系统**给绝对指针映射的那块屏幕区域. Windows 11 实测
+  (2026-11-14, 5120x1440 主屏 + 2560x1440 副屏): **只映射到主屏** ——
+  像素 `x = floor(v * W / 32768)`, 副屏够不到. Windows 还会**丢弃恰好 `(0, 0)` 的
+  报告**; 发 `(1, 1)` 就已经落在像素 `(0, 0)`. 其他系统未实测 —— 宿主应当
+  换算、移动、再读回光标核对.
+- 早于 1.2.0 的固件, 以及在 1.2 之前的 `boot.py` 下运行的 1.2 `code.py`
+  (没启用绝对指针), 都回 `ERROR / UNKNOWN_COMMAND`. 这就是能力探测: 退回相对
+  `MOUSE_MOVE`. 指针存在时 `STATUS_RESPONSE` 还会带 `"caps": ["abs"]`.
+- 为什么新增 opcode 而不用 `MOUSE_MOVE` 预留的 bit0: 1.2 之前的固件全都忽略这一位,
+  那样发出去的绝对坐标会在已售出的板子上被当成一次巨大的**相对**位移执行.
+  未知 opcode 则会被拒绝.
+- 点击仍走相对鼠标上的 `MOUSE_CLICK`; 绝对指针从不按键.
 
 **MOUSE_BUTTON_DOWN / MOUSE_BUTTON_UP (v1.1):**
 
@@ -213,3 +233,4 @@ Host (H)                  Device (D)
 |------|-------------|---------|
 | v0.1 | 2026-03-12  | 初始草案 |
 | v1.0 | 2026-03-15  | 正式冻结:新增 ERROR 代码表、超时建议、STATUS_RESPONSE 格式、最大帧长约束 |
+| 模块 1.2.0 / 固件 1.2.0 | 2026-11-14 | 累加: `MOUSE_MOVE_ABS`(`0x15`); `STATUS_RESPONSE` 可带 `"caps": ["abs"]` |

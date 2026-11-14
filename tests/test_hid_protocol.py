@@ -37,12 +37,13 @@ from clawtouch_hid_protocol import (
 
 
 class TestSpecConstants:
-    def test_protocol_version_is_1_1_1(self):
+    def test_protocol_version_is_1_2_0(self):
         # v1.0 baseline 2026-03-15; v1.1 (2026-05-28) added MOUSE_BUTTON_DOWN/UP
         # for drag + CUA; v1.1.1 (2026-05-29, pre-publish) unified
         # KEY_PRESS/RELEASE payload to [modifiers, keycode] to match KEY_COMBO
-        # and the USB HID keyboard report layout.
-        assert PROTOCOL_VERSION == "1.1.1"
+        # and the USB HID keyboard report layout; v1.2.0 (2026-11-14) added
+        # MOUSE_MOVE_ABS (0x15) for the firmware 1.2 absolute pointer.
+        assert PROTOCOL_VERSION == "1.2.0"
 
     def test_frame_header_is_AA(self):
         assert FRAME_HEADER == 0xAA
@@ -209,3 +210,34 @@ class TestModifierAliases:
     def test_unknown_raises(self):
         with pytest.raises(ProtocolError):
             modifiers_to_mask(["meta"])  # not an alias
+
+
+class TestMouseMoveAbs:
+    """v1.2: MOUSE_MOVE_ABS is a NEW opcode, not bit0 of MOUSE_MOVE. Older
+    firmware ignores MOUSE_MOVE's flags and would treat an absolute position
+    as a relative delta (a wild jump); an unknown opcode it answers with
+    ERROR(UNKNOWN_COMMAND) instead, which the host can fall back on."""
+
+    def test_opcode_locked_at_0x15(self):
+        from clawtouch_hid_protocol import CommandType
+        assert CommandType.MOUSE_MOVE_ABS == 0x15
+
+    def test_payload_is_two_uint16_le(self):
+        from clawtouch_hid_protocol import CommandType, HidCommand, build_mouse_move_abs
+        cmd = build_mouse_move_abs(0x1234, 0x7FFF, seq_id=5)
+        assert cmd.payload == bytes([0x34, 0x12, 0xFF, 0x7F])
+        back = HidCommand.deserialize(cmd.serialize())
+        assert back.cmd_type == CommandType.MOUSE_MOVE_ABS
+        assert back.payload == cmd.payload and back.seq_id == 5
+
+    @pytest.mark.parametrize("x,y", [(-1, 0), (0, -1), (0x8000, 0), (0, 0x8000)])
+    def test_out_of_range_rejected(self, x, y):
+        from clawtouch_hid_protocol import ProtocolError, build_mouse_move_abs
+        with pytest.raises(ProtocolError):
+            build_mouse_move_abs(x, y)
+
+    def test_edges_accepted(self):
+        from clawtouch_hid_protocol import ABS_POINTER_MAX, build_mouse_move_abs
+        assert ABS_POINTER_MAX == 0x7FFF
+        build_mouse_move_abs(0, 0)
+        build_mouse_move_abs(ABS_POINTER_MAX, ABS_POINTER_MAX)

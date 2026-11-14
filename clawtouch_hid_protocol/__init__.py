@@ -9,6 +9,7 @@ from .protocol import (
     PROTOCOL_VERSION,
     FRAME_HEADER,
     MAX_PAYLOAD_LEN,
+    ABS_POINTER_MAX,            # v1.2
     # Enums
     CommandType,
     MouseButton,
@@ -24,6 +25,7 @@ from .protocol import (
     build_mouse_scroll,
     build_mouse_button_down,    # v1.1
     build_mouse_button_up,      # v1.1
+    build_mouse_move_abs,       # v1.2
     build_key_press,
     build_key_release,
     build_key_combo,
@@ -37,6 +39,7 @@ __all__ = [
     "PROTOCOL_VERSION",
     "FRAME_HEADER",
     "MAX_PAYLOAD_LEN",
+    "ABS_POINTER_MAX",
     "CommandType",
     "MouseButton",
     "ModifierKey",
@@ -49,6 +52,7 @@ __all__ = [
     "build_mouse_scroll",
     "build_mouse_button_down",
     "build_mouse_button_up",
+    "build_mouse_move_abs",
     "build_key_press",
     "build_key_release",
     "build_key_combo",
